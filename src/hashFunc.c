@@ -16,7 +16,7 @@ void append(char* s, const char* t) { while(*s) ++s;
 // Est-il possible de ne pas utiliser system, ce qui est préférable par l'énoncé?
 void hashFile(char* source, char* dest) {
   /*
-    use sha256sum to hash source and save to dest
+    Use sha256sum to hash source and save to dest
   */
   char cmd[CMDL] = "sha256sum ";
   append(cmd, source);
@@ -28,7 +28,7 @@ void hashFile(char* source, char* dest) {
 // Il faut utiliser un pipe, une redirection, un fichier temporaire. Pipe je n'ai pas l'utilisé.
 char* sha256file(char* file) {
   /*
-    return the sha256sum result of file
+    Return the sha256sum result of file
   */
   static char template[] = "/tmp/iamhoviadinXXXXXX";
   char fname[CMDL];
