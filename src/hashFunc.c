@@ -4,7 +4,8 @@
 #include <string.h>
 #define CMDL 233
 
-void append(char* s, const char* t) { while(*s) ++s;
+void append(char* s, const char* t) {
+  while(*s) ++s;
   while(*t) {
     *s = *t;
     ++s; ++t;
