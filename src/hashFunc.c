@@ -1,8 +1,7 @@
 #include <unistd.h>
 #include <stdlib.h>
-#include "debug.h"
+#include "misc.h"
 #include <string.h>
-#define CMDL 233
 
 void append(char* s, const char* t) {
   while(*s) ++s;
@@ -19,7 +18,7 @@ void hashFile(char* source, char* dest) {
   /*
     Use sha256sum to hash source and save to dest
   */
-  char cmd[CMDL] = "sha256sum ";
+  char cmd[MAXL] = "sha256sum ";
   append(cmd, source);
   append(cmd, " > ");
   append(cmd, dest);
@@ -32,14 +31,14 @@ char* sha256file(char* file) {
     Return the sha256sum result of file
   */
   static char template[] = "/tmp/iamhoviadinXXXXXX";
-  char fname[CMDL];
+  char fname[MAXL];
   strcpy(fname, template);
   int fd = mkstemp(fname);
   hashFile(file, fname);
 
   FILE* f = fdopen(fd, "r");
-  char buf[CMDL];
-  fgets(buf, CMDL, f);
+  char buf[MAXL];
+  fgets(buf, MAXL, f);
   char* res = strdup(buf);
 
   if(fclose(f)) err("File closing error\n");

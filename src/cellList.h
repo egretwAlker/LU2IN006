@@ -16,6 +16,7 @@ Data format:
 List* initList();
 Cell* buildCell(char* s);
 void insertFirst(List* l, Cell* c);
+void insertFirstString(List* l, char* s);
 char* ctos(Cell* c);
 char* ltos(List* l);
 Cell* listGet(List* l, int k);

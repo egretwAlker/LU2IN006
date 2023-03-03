@@ -1,0 +1,1 @@
+gcc -g -Wall tests.c ../src/cellList.c ../src/fsop.c -o tests.exe

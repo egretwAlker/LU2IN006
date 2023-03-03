@@ -4,7 +4,3 @@ bin/%.o: src/%.c
 
 bin/%.exe: src/%.c
 	$(GCC) $^ -o $@
-
-test: bin/cellList.o
-	$(GCC) tests/tests.c bin/cellList.o -o bin/tests.exe
-	./bin/tests.exe

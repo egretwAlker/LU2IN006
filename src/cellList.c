@@ -1,12 +1,12 @@
 #include "cellList.h"
 #include <stdio.h>
-#include "debug.h"
+#include "misc.h"
 #include <string.h>
 #include <stdlib.h>
-#define L 2333
 
 List* initList() {
   List* l = malloc(sizeof(List));
+  *l = NULL;
   return l;
 }
 
@@ -23,6 +23,10 @@ Cell* buildCell(char* s) {
 void insertFirst(List* l, Cell* c) {
   c->next = *l;
   *l = c;
+}
+
+void insertFirstString(List* l, char* s) {
+  insertFirst(l, buildCell(s));
 }
 
 char* ctos(Cell* c) {
@@ -103,7 +107,7 @@ void ltof(List* l, char* path) {
 
 List* ftol(char* path) {
   FILE *f = fopen(path, "r");
-  char buf[L];
+  char buf[MAXL];
   fscanf(f, "%s", buf);
   List* res = stol(buf);
   fclose(f);
