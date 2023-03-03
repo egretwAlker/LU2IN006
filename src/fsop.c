@@ -2,6 +2,7 @@
 #include "misc.h"
 #include <dirent.h>
 #include <string.h>
+#include <stdlib.h>
 
 // Peut-etre il faut faire récursivement (rentrer dans tous les dossiers...)?
 List* listdir(char* root_dir) {
@@ -17,13 +18,12 @@ List* listdir(char* root_dir) {
       insertFirstString(res, ep->d_name);
     }
   }
+  closedir(dp);
   return res;
 }
 
 int file_exists(char* file) {
   List* l = listdir(".");
-  // err("&");
-  // err("(%s)\n", ltos(l));
   int res = (searchList(l, file) != NULL);
   cleanList(l);
   return res;
@@ -41,4 +41,16 @@ void cp(char* dest, char* src) {
   }
   fclose(d);
   fclose(s);
+}
+
+char* hashToPath(char* hash) {
+  /*
+    Return '??/*' from '??*'
+  */
+  char* s = malloc(sizeof(char)*(strlen(hash)+2));
+  s[0] = hash[0];
+  s[1] = hash[1];
+  s[2] = '/';
+  strcpy(s+3, hash+2);
+  return s;
 }

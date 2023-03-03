@@ -21,8 +21,12 @@ void test2() {
   assert(system("diff test3.txt test4.txt") == 0);
 }
 
+void test3() {
+}
+
 int main(void) {
   // test1();
   test2();
+  // test3();
   return 0;
 }
