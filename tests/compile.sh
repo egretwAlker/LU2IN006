@@ -1,1 +1,1 @@
-gcc -g -Wall tests.c ../src/cellList.c ../src/fsop.c -o tests.exe
+gcc -g -Wall tests.c ../src/cellList.c ../src/fsop.c ../src/hashFunc.c -o tests.exe

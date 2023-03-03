@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <string.h>
 #include <stdlib.h>
+#include "hashFunc.h"
 
 // Peut-etre il faut faire récursivement (rentrer dans tous les dossiers...)?
 List* listdir(char* root_dir) {
@@ -47,10 +48,29 @@ char* hashToPath(char* hash) {
   /*
     Return '??/*' from '??*'
   */
-  char* s = malloc(sizeof(char)*(strlen(hash)+2));
+  int len = strlen(hash);
+  if(len < 3) {
+    err("Hash too short error");
+    return NULL;
+  }
+  char* s = malloc(sizeof(char)*(len+2));
   s[0] = hash[0];
   s[1] = hash[1];
   s[2] = '/';
   strcpy(s+3, hash+2);
   return s;
+}
+
+void blobFile(char* file) {
+  char* hash = sha256file(file);
+  char* path = hashToPath(hash);
+  // err("(%s)", hash);
+  path[2] = 0;
+  char cmd1[MAXL] = "mkdir -p ";
+  append(cmd1, path);
+  system(cmd1);
+  path[2] = '/';
+  cp(path, file);
+  free(hash);
+  free(path);
 }

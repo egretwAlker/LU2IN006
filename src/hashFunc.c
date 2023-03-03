@@ -20,7 +20,7 @@ void hashFile(char* source, char* dest) {
   */
   char cmd[MAXL] = "sha256sum ";
   append(cmd, source);
-  append(cmd, " > ");
+  append(cmd, " | awk '{printf \"%s\",$1}' > ");
   append(cmd, dest);
   if(system(cmd)) err("%s failed\n", cmd);
 }
@@ -44,11 +44,4 @@ char* sha256file(char* file) {
   if(fclose(f)) err("File closing error\n");
   if(remove(fname)) err("File removing error\n"); 
   return res;
-}
-
-int main(int argn, char** args) {
-  char *s = sha256file("debug.h");
-  err("%s\n", s);
-  free(s);
-  return 0;
 }
