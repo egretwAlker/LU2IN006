@@ -25,7 +25,6 @@ void hashFile(char* source, char* dest) {
   if(system(cmd)) err("%s failed\n", cmd);
 }
 
-// Il faut utiliser un pipe, une redirection, un fichier temporaire. Pipe je n'ai pas l'utilisé.
 char* sha256file(char* file) {
   /*
     Return the sha256sum result of file
