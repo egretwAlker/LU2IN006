@@ -12,8 +12,8 @@ void append(char* s, const char* t) {
   *s = 0;
 }
 
-// Dans l'énoncé, on demande de retourner une valeur int, pourquoi?
-// Est-il possible de ne pas utiliser system, ce qui est préférable par l'énoncé?
+// Dans l'énoncé, on demande de retourner une valeur int, pourquoi? | Peut etre retourner -1 en cas d'erreur et 0 sinon
+// Est-il possible de ne pas utiliser system, ce qui est préférable par l'énoncé? | Je pense pas vu que tu dois appeler sha256sum
 void hashFile(char* source, char* dest) {
   /*
     Use sha256sum to hash source and save to dest
