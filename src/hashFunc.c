@@ -14,7 +14,7 @@ void append(char* s, const char* t) {
 
 // Dans l'énoncé, on demande de retourner une valeur int, pourquoi?
 // Est-il possible de ne pas utiliser system, ce qui est préférable par l'énoncé?
-void hashFile(char* source, char* dest) {
+int hashFile(char* source, char* dest) {
   /*
     Use sha256sum to hash source and save to dest
   */
@@ -22,7 +22,11 @@ void hashFile(char* source, char* dest) {
   append(cmd, source);
   append(cmd, " | awk '{printf \"%s\",$1}' > ");
   append(cmd, dest);
-  if(system(cmd)) err("%s failed\n", cmd);
+  if(system(cmd)) {
+    err("%s failed\n", cmd);
+    return -1;
+  }
+  return 0;
 }
 
 char* sha256file(char* file) {

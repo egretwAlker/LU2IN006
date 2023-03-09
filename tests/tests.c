@@ -4,6 +4,7 @@
 #include "../src/fsop.h"
 #include "../src/misc.h"
 #include "../src/hashFunc.h"
+#include "../src/workTree.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,11 +41,33 @@ void test4() {
   blobFile("test3.txt");
 }
 
+void test5() {
+  char t[] = "name\thash\t123";
+  WorkFile* wf = stwf(t);
+  char *s = wfts(wf);
+  err("%s", s);
+  assert(strcmp(s, t) == 0);
+  clearWf(wf);
+  free(s);
+}
+
+void test6() {
+  char t[] = "name\thash\t123\nname1\thash1\t1234\n";
+  WorkTree* wt = stwt(t);
+  char *s = wtts(wt);
+  err("%s", s);
+  assert(strcmp(s, t) == 0);
+  clearWt(wt);
+  free(s);
+}
+
 int main(void) {
   // test0();
   // test1();
   // test2();
   // test3();
-  test4();
+  // test4();
+  // test5();
+  test6();
   return 0;
 }
