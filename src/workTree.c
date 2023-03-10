@@ -154,6 +154,10 @@ WorkTree* ftwt(char* file) {
 }
 
 void clearWt(WorkTree* wt) {
+    for(int i=0;i<wt->n;++i) {
+        free(wt->tab[i].name);
+        free(wt->tab[i].hash);
+    }
     free(wt->tab);
     free(wt);
 }
