@@ -1,1 +1,1 @@
-gcc -g -Wall tests.c ../src/workTree.c ../src/cellList.c ../src/fsop.c ../src/hashFunc.c -o tests.exe
+gcc -g -Wall -ftrapv -Wconversion -Wall -Wextra -fno-common -fno-builtin tests.c ../src/workTree.c ../src/cellList.c ../src/fsop.c ../src/hashFunc.c -o tests.exe

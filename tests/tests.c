@@ -18,7 +18,7 @@ void test0() {
 void test1() {
   List* l = ftol("test1.txt");
   ltof(l, "test2.txt");
-  cleanList(l);
+  clearList(l);
   err("Check the content of test1.txt and test2.txt");
 }
 
@@ -61,6 +61,13 @@ void test6() {
   free(s);
 }
 
+void test7() {
+  List* l = listdir(".");
+  char* s = ltos(l);
+  err("%s\n", s);
+  free(s);
+}
+
 int main(void) {
   // test0();
   // test1();
@@ -68,6 +75,7 @@ int main(void) {
   // test3();
   // test4();
   // test5();
-  test6();
+  // test6();
+  test7();
   return 0;
 }

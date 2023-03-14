@@ -10,10 +10,13 @@ List* initList() {
   return l;
 }
 
+/**
+ * @brief With strdup, create a cell representing s
+ * 
+ * @param s 
+ * @return Cell* 
+ */
 Cell* buildCell(char* s) {
-  /*
-    With strdup, create a cell representing s
-  */
   Cell* res = malloc(sizeof(Cell));
   res->data = strdup(s);
   res->next = NULL;
@@ -29,17 +32,23 @@ void insertFirstString(List* l, char* s) {
   insertFirst(l, buildCell(s));
 }
 
+/**
+ * @brief Without strdup, return the string represented by c
+ * 
+ * @param c 
+ * @return char* 
+ */
 char* ctos(Cell* c) {
-  /*
-    Without strdup, return the string represented by c
-  */
   return c->data;
 }
 
+/**
+ * @brief Return the concatenation of strings of cells of l in the form "string1|string2|...|stringn"
+ * 
+ * @param l 
+ * @return char* 
+ */
 char* ltos(List* l) {
-  /*
-    Return the concatenation of strings of cells of l in the form "string1|string2|...|stringn"
-  */
   int len = 1;
   for(Cell* c=*l; c; c=c->next) {
     len += strlen(ctos(c))+1;
@@ -56,10 +65,14 @@ char* ltos(List* l) {
   return s;
 }
 
+/**
+ * @brief Return l[k] (counting from 0)
+ * 
+ * @param l 
+ * @param k 
+ * @return Cell* 
+ */
 Cell* listGet(List* l, int k) {
-  /*
-    Return l[k] (counting from 0)
-  */
   Cell *c = *l;
   while(k && c) {
     c = c->next;
@@ -69,19 +82,26 @@ Cell* listGet(List* l, int k) {
   return c;
 }
 
+/**
+ * @brief Return the first cell of which the data equals to s or NULL if not found.
+ * 
+ * @param l 
+ * @param s 
+ * @return Cell* 
+ */
 Cell* searchList(List* l, char* s) {
-  /*
-    Return the first cell of which the data equals to s or NULL if not found.
-  */
  if(l == NULL) return NULL;
  for(Cell *c = *l; c; c=c->next) if(strcmp(c->data, s)==0) return c;
  return NULL;
 }
 
+/**
+ * @brief Return a list representing s
+ * 
+ * @param s 
+ * @return List* 
+ */
 List* stol(const char* s) {
-  /*
-    Return a list representing s
-  */
   char* s1 = strdup(s);
   List* l = initList();
   char* x = s1;
@@ -114,15 +134,15 @@ List* ftol(char* path) {
   return res;
 }
 
-void cleanCell(Cell* c) {
+void clearCell(Cell* c) {
   free(c->data);
   free(c);
 }
 
-void cleanList(List *l) {
+void clearList(List *l) {
   for(Cell *c=*l, *p; c; c=p) {
     p=c->next;
-    cleanCell(c);
+    clearCell(c);
   }
   free(l);
 }

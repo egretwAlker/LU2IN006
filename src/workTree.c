@@ -1,4 +1,6 @@
 #include "misc.h"
+#include "fsop.h"
+#include "hashFunc.h"
 #include "workTree.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,14 +9,15 @@
 #include <unistd.h>
 #include <string.h>
 
-int getChmod ( const char * path ) {
+int getChmod( const char * path) {
     struct stat ret ;
 
-    if (stat(path, &ret) == -1) {
+    if(stat(path, &ret) == -1) {
         return -1;
     }
 
-    return ( ret.st_mode & S_IRUSR ) |( ret.st_mode & S_IWUSR ) | ( ret.st_mode & S_IXUSR ) |
+    // Copied from the poly, but Wouldn't that be ret.st_mode & (...|...)
+    return ( ret.st_mode & S_IRUSR ) | ( ret.st_mode & S_IWUSR ) | ( ret.st_mode & S_IXUSR ) |
     /*owner*/
     ( ret.st_mode & S_IRGRP ) | ( ret.st_mode & S_IWGRP ) | ( ret.st_mode & S_IXGRP ) |
     /*group*/
@@ -22,7 +25,7 @@ int getChmod ( const char * path ) {
     /*other*/
 }
 
-void setMode ( int mode , char * path ) {
+void setMode(int mode, char * path) {
     char buff[100];
     sprintf(buff, "chmod %d %s", mode, path);
     system(buff);
@@ -44,10 +47,13 @@ WorkFile* createWorkFile2(char* name, char* hash, int mode) {
     return new;
 }
 
+/**
+ * @brief hash should not be NULL
+ * 
+ * @param wf 
+ * @return char* 
+ */
 char* wfts(WorkFile* wf) {
-    /*
-        hash should not be NULL
-    */
     if(wf->hash == NULL) {
         err("hash NULL error\n");
     }
@@ -77,10 +83,14 @@ WorkTree* initWorkTree() {
     return wt;
 }
 
+/**
+ * @brief Return the position of file of folder named name in wt, -1 if not found
+ * 
+ * @param wt 
+ * @param name 
+ * @return int 
+ */
 int inWorkTree(WorkTree* wt, char* name) {
-    /*
-        Return the position of file of folder named name in wt, -1 if not found
-    */
     for(int i=0; i<wt->n; ++i) {
         if(strcmp(wt->tab[i].name, name) == 0)
             return i;
@@ -88,8 +98,7 @@ int inWorkTree(WorkTree* wt, char* name) {
     return -1;
 }
 
-int appendWorkTree(WorkTree* wt, char* name, char* hash, int
-mode) {
+int appendWorkTree(WorkTree* wt, char* name, char* hash, int mode) {
     if(wt->size == wt->n) {
         err("WorkTree full error\n");
         return -1;
@@ -160,4 +169,34 @@ void clearWt(WorkTree* wt) {
     }
     free(wt->tab);
     free(wt);
+}
+
+/**
+ * @brief Create a temporary file containing the content of wt and take a snapshot of it
+ * 
+ * @param wt 
+ * @return char* the hash of the temporary file
+ */
+char* blobWorkTree(WorkTree* wt) {
+    char* fname = createTemp();
+    char* s = wttf(wt, fname);
+    char* hash = sha256file(fname);
+    blobFileExt(fname);
+    free(fname);
+    free(s);
+    return hash;
+}
+
+/**
+ * @brief Create a snapshot of the file wt at path 
+ * 
+ * @param wt 
+ * @param path 
+ * @return char* 
+ */
+char* saveWorkTree(WorkTree* wt, char* path) {
+    for(int i=0;i<wt->n;++i) {
+        // Have to check if the file is a folder
+    }
+    return NULL;
 }

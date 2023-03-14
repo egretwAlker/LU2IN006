@@ -1,5 +1,10 @@
 #ifndef WORKTREE
 #define WORKTREE
+
+/**
+ * @brief Represent a file or a folder/directory.
+ * 
+ */
 typedef struct {
     char* name;
     char* hash;
@@ -27,4 +32,6 @@ int wttf(WorkTree* wt, char* file);
 WorkTree* ftwt(char* file);
 WorkTree* stwt(char* s);
 void clearWt(WorkTree* wt);
+char* blobWorkTree(WorkTree* wt);
+char* saveWorkTree(WorkTree* wt, char* path);
 #endif

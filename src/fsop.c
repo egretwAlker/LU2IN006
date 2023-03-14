@@ -4,18 +4,22 @@
 #include <string.h>
 #include <stdlib.h>
 #include "hashFunc.h"
+#include <unistd.h>
 
-// Peut-etre il faut faire récursivement (rentrer dans tous les dossiers...)?
+/**
+ * @brief Store all names of files and directories in a list which is then returned
+ *
+ * @param root_dir 
+ * @return List* 
+ */
 List* listdir(char* root_dir) {
-  /*
-    Store all names of files and directories in a list which is then returned
-  */
   List* res = initList();
   DIR* dp = opendir(root_dir);
   struct dirent *ep;
   if(dp != NULL) {
     while((ep = readdir(dp)) != NULL) {
       if(!strcmp(ep->d_name, ".") || !strcmp(ep->d_name, "..")) continue;
+      // err("%s, %d\n", ep->d_name, ep->d_type);
       insertFirstString(res, ep->d_name);
     }
   }
@@ -26,7 +30,7 @@ List* listdir(char* root_dir) {
 int file_exists(char* file) {
   List* l = listdir(".");
   int res = (searchList(l, file) != NULL);
-  cleanList(l);
+  clearList(l);
   return res;
 }
 
@@ -44,10 +48,13 @@ void cp(char* dest, char* src) {
   fclose(s);
 }
 
+/**
+ * @brief Return '??/*' from '??*'
+ * 
+ * @param hash 
+ * @return char* 
+ */
 char* hashToPath(char* hash) {
-  /*
-    Return '??/*' from '??*'
-  */
   int len = strlen(hash);
   if(len < 3) {
     err("Hash too short error");
@@ -61,6 +68,11 @@ char* hashToPath(char* hash) {
   return s;
 }
 
+/**
+ * @brief Save the snapshot of file
+ * 
+ * @param file 
+ */
 void blobFile(char* file) {
   char* hash = sha256file(file);
   char* path = hashToPath(hash);
@@ -73,4 +85,38 @@ void blobFile(char* file) {
   cp(path, file);
   free(hash);
   free(path);
+}
+
+/**
+ * @brief Save the snapshot of file with extension .t
+ * 
+ * @param file 
+ */
+void blobFileExt(char* file) {
+  char* hash = sha256file(file);
+  char* path = hashToPath(hash);
+  // err("(%s)", hash);
+  path[2] = 0;
+  char cmd1[MAXL] = "mkdir -p ";
+  append(cmd1, path);
+  system(cmd1);
+  path[2] = '/';
+  strcpy(cmd1, path);
+  append(cmd1, ".t");
+  cp(path, file);
+  free(hash);
+  free(path);
+}
+
+/**
+ * @brief Create a temporary file in /tmp
+ * 
+ * @return char* the name of the temporary file, starting by /tmp
+ */
+char* createTemp() {
+  static const char template[] = "/tmp/iamhoviadinXXXXXX";
+  char* fname = strdup(template);
+  int fd = mkstemp(fname);
+  close(fd);
+  return fname;
 }

@@ -24,6 +24,6 @@ Cell* searchList(List* l, char* s);
 List* stol(const char* s);
 void ltof(List* l, char* path);
 List* ftol(char* path);
-void cleanCell(Cell* c);
-void cleanList(List *l);
+void clearCell(Cell* c);
+void clearList(List *l);
 #endif
