@@ -9,22 +9,6 @@
 #include <unistd.h>
 #include <string.h>
 
-int getChmod( const char * path) {
-    struct stat ret ;
-
-    if(stat(path, &ret) == -1) {
-        return -1;
-    }
-
-    // Copied from the poly, but Wouldn't that be ret.st_mode & (...|...)
-    return ( ret.st_mode & S_IRUSR ) | ( ret.st_mode & S_IWUSR ) | ( ret.st_mode & S_IXUSR ) |
-    /*owner*/
-    ( ret.st_mode & S_IRGRP ) | ( ret.st_mode & S_IWGRP ) | ( ret.st_mode & S_IXGRP ) |
-    /*group*/
-    ( ret.st_mode & S_IROTH ) | ( ret.st_mode & S_IWOTH ) | ( ret.st_mode & S_IXOTH );
-    /*other*/
-}
-
 void setMode(int mode, char * path) {
     char buff[100];
     sprintf(buff, "chmod %d %s", mode, path);
@@ -42,7 +26,7 @@ WorkFile* createWorkFile(char* name) {
 WorkFile* createWorkFile2(char* name, char* hash, int mode) {
     WorkFile* new = (WorkFile*)malloc(sizeof(WorkFile));
     new->name = strdup(name);
-    new->hash = strdup(hash);
+    new->hash = hash == NULL ? NULL : strdup(hash);
     new->mode = mode;
     return new;
 }
@@ -182,21 +166,48 @@ char* blobWorkTree(WorkTree* wt) {
     char* s = wttf(wt, fname);
     char* hash = sha256file(fname);
     blobFileExt(fname);
+    if(remove(fname))
+        err("File removing error\n");
     free(fname);
     free(s);
     return hash;
 }
 
+WorkTree* getWtFromPath(char* path) {
+    WorkTree* newWt = initWorkTree();
+    List* l = listdir(path);
+    for(Cell* c = *l; c; c = c->next) {
+        // err("f: %s\n", c->data);
+        appendWorkTree(newWt, c->data, NULL, 0);
+    }
+    clearList(l);
+    return newWt;
+}
+
 /**
- * @brief Create a snapshot of the file wt at path 
+ * @brief Create a snapshot of the files and folders of wt at path
+ * and fill in the hash and mode entry
  * 
- * @param wt 
+ * @param wt
  * @param path 
  * @return char* 
  */
 char* saveWorkTree(WorkTree* wt, char* path) {
     for(int i=0;i<wt->n;++i) {
-        // Have to check if the file is a folder
+        char buf[MAXL];
+        strcpy(buf, path);
+        append(buf, "/");
+        append(buf, wt->tab[i].name);
+        if(isDir(buf)) {
+            WorkTree* newWt = getWtFromPath(buf);
+            wt->tab[i].hash = saveWorkTree(newWt, buf);
+            wt->tab[i].mode = getChmod(buf);
+            clearWt(newWt);
+        } else {
+            blobFile(buf);
+            wt->tab[i].hash = sha256file(buf);
+            wt->tab[i].mode = getChmod(buf);
+        }
     }
-    return NULL;
+    return blobWorkTree(wt);
 }

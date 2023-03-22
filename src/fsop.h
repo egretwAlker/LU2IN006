@@ -9,4 +9,6 @@ char* hashToPath(char* hash);
 void blobFile(char* file);
 void blobFileExt(char* file);
 char* createTemp();
+int getChmod(const char* path);
+int isDir(const char * path);
 #endif

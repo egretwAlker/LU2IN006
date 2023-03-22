@@ -33,7 +33,7 @@ void test2() {
 void test3() {
   char* s = hashToPath("abcdef");
   err("%s\n", s);
-  assert(strcmp(s, "ab/cdef") == 0);
+  assert(strcmp(s, ".mygit/ab/cdef") == 0);
   free(s);
 }
 
@@ -66,16 +66,23 @@ void test7() {
   char* s = ltos(l);
   err("%s\n", s);
   free(s);
+  clearList(l);
+}
+
+void test8() {
+  err("%d %d\n", isDir("dc"), isDir("test1.txt"));
+}
+
+void test9() {
+  WorkTree* newWt = getWtFromPath(".");
+  char *s = saveWorkTree(newWt, ".");
+  free(s);
+  clearWt(newWt);
 }
 
 int main(void) {
-  // test0();
-  // test1();
-  // test2();
   // test3();
-  // test4();
-  // test5();
-  // test6();
-  test7();
+  // test7();
+  test9();
   return 0;
 }

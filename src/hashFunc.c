@@ -49,7 +49,7 @@ char* sha256file(char* file) {
   char* res = strdup(buf);
 
   if(fclose(f)) err("File closing error\n");
-  if(remove(fname)) err("File removing error\n"); 
+  if(remove(fname)) err("File removing error\n");
   free(fname);
   return res;
 }

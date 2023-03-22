@@ -17,7 +17,6 @@ typedef struct {
     int n;
 } WorkTree;
 
-int getChmod(const char* path);
 void setMode(int mode, char* path);
 WorkFile* createWorkFile(char* name);
 char* wfts(WorkFile* wf);
@@ -34,4 +33,5 @@ WorkTree* stwt(char* s);
 void clearWt(WorkTree* wt);
 char* blobWorkTree(WorkTree* wt);
 char* saveWorkTree(WorkTree* wt, char* path);
+WorkTree* getWtFromPath(char* path);
 #endif
