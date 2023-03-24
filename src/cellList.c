@@ -51,10 +51,10 @@ char* ctos(Cell* c) {
 char* ltos(List* l) {
   int len = 1;
   for(Cell* c=*l; c; c=c->next) {
-    len += strlen(ctos(c))+1;
+    len += (int)strlen(ctos(c))+1;
   }
   if(*l) --len;
-  char* s = malloc(sizeof(char)*(len+1));
+  char* s = malloc(sizeof(char)*(szt)(len+1));
   char* t = s;
   for(Cell* c=*l; c; c=c->next) {
     strcpy(t, ctos(c));
@@ -105,7 +105,7 @@ List* stol(const char* s) {
   char* s1 = strdup(s);
   List* l = initList();
   char* x = s1;
-  int len = strlen(s);
+  int len = (int)strlen(s);
   for(int i=0;i<=len;++i) {
     if(s1[i]=='|' || !s1[i]) {
       s1[i] = 0;
@@ -134,15 +134,15 @@ List* ftol(char* path) {
   return res;
 }
 
-void clearCell(Cell* c) {
+void freeCell(Cell* c) {
   free(c->data);
   free(c);
 }
 
-void clearList(List *l) {
+void freeList(List *l) {
   for(Cell *c=*l, *p; c; c=p) {
     p=c->next;
-    clearCell(c);
+    freeCell(c);
   }
   free(l);
 }

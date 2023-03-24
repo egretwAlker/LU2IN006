@@ -5,6 +5,7 @@
 #include "../src/misc.h"
 #include "../src/hashFunc.h"
 #include "../src/workTree.h"
+#include "../src/gestionCommits.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +19,7 @@ void test0() {
 void test1() {
   List* l = ftol("test1.txt");
   ltof(l, "test2.txt");
-  clearList(l);
+  freeList(l);
   err("Check the content of test1.txt and test2.txt");
 }
 
@@ -47,7 +48,7 @@ void test5() {
   char *s = wfts(wf);
   err("%s", s);
   assert(strcmp(s, t) == 0);
-  clearWf(wf);
+  freeWf(wf);
   free(s);
 }
 
@@ -57,7 +58,7 @@ void test6() {
   char *s = wtts(wt);
   err("%s", s);
   assert(strcmp(s, t) == 0);
-  clearWt(wt);
+  freeWt(wt);
   free(s);
 }
 
@@ -66,7 +67,7 @@ void test7() {
   char* s = ltos(l);
   err("%s\n", s);
   free(s);
-  clearList(l);
+  freeList(l);
 }
 
 void test8() {
@@ -77,12 +78,34 @@ void test9() {
   WorkTree* newWt = getWtFromPath(".");
   char *s = saveWorkTree(newWt, ".");
   free(s);
-  clearWt(newWt);
+  freeWt(newWt);
+}
+
+void test10() {
+  char s[] = "123: 456";
+  kvp* k = stkv(s);
+  char* t = kvts(k);
+  err("s: %s; t: %s;\n", s, t);
+  assert(strcmp(s, t) == 0);
+  freeKeyVal(k);
+  free(t);
+}
+
+void test11() {
+  Commit* c = createCommit("123");
+  commitSet(c, "olex", "hovi");
+  commitSet(c, "olex", "adin");
+  char* s = cts(c);
+  err("[%s]\n", s);
+  free(c);
+  Commit* a = stc(s);
+  char* t = cts(a);
+  err("[%s]\n", t);
+  free(s);
+  free(t);
 }
 
 int main(void) {
-  // test3();
-  // test7();
-  test9();
+  test11();
   return 0;
 }

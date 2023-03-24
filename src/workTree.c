@@ -38,6 +38,9 @@ WorkFile* createWorkFile2(char* name, char* hash, int mode) {
  * @return char* 
  */
 char* wfts(WorkFile* wf) {
+    if(wf->name == NULL) {
+        err("name NULL error\n");
+    }
     if(wf->hash == NULL) {
         err("hash NULL error\n");
     }
@@ -53,8 +56,8 @@ WorkFile* stwf(char* ch) {
     return createWorkFile(buf1);
 }
 
-void clearWf(WorkFile* wf) {
-    free(wf->name);
+void freeWf(WorkFile* wf) {
+    free(wf->name); // free(NULL), nothing happens
     free(wf->hash);
     free(wf);
 }
@@ -62,7 +65,7 @@ void clearWf(WorkFile* wf) {
 WorkTree* initWorkTree() {
     WorkTree* wt = (WorkTree*)malloc(sizeof(WorkTree));
     wt->size = WTS;
-    wt->tab = (WorkFile*)malloc(sizeof(WorkFile)*(wt->size));
+    wt->tab = (WorkFile*)malloc(sizeof(WorkFile)*(szt)(wt->size));
     wt->n = 0;
     return wt;
 }
@@ -100,7 +103,7 @@ char* wtts(WorkTree* wt) {
     for(int i=0; i<wt->n; ++i) {
         char *s = wfts(&(wt->tab[i]));
         sprintf(buf+l, "%s\n", s);
-        l += strlen(s)+1;
+        l += (int)strlen(s)+1;
         free(s);
     }
     return strdup(buf);
@@ -109,7 +112,7 @@ char* wtts(WorkTree* wt) {
 WorkTree* stwt(char* s) {
     WorkTree* wt = initWorkTree();
     char buf[MAXL];
-    int p = 0, n = strlen(s);
+    int p = 0, n = (int)strlen(s);
     while(p < n) {
         int t = 0;
         while(p<n && s[p] != '\n') buf[t++] = s[p++];
@@ -117,7 +120,7 @@ WorkTree* stwt(char* s) {
         WorkFile *wf = stwf(buf);
         if(appendWorkTree(wt, wf->name, wf->hash, wf->mode) == -1)
             err("Appending error\n");
-        clearWf(wf);
+        freeWf(wf);
     }
     return wt;
 }
@@ -128,7 +131,9 @@ int wttf(WorkTree* wt, char* file) {
         err("Error while opening the file\n");
         return -1;
     }
-    fprintf(f, "%s", wtts(wt));
+    char* s = wtts(wt);
+    fprintf(f, "%s", s);
+    free(s);
     fclose(f);
     return 0;
 }
@@ -140,13 +145,13 @@ WorkTree* ftwt(char* file) {
         return NULL;
     }
     char buf[MAXL];
-    int m = fread(buf, MAXL-1, sizeof(char), f);
+    int m = (int)fread(buf, MAXL-1, sizeof(char), f);
     buf[m] = 0;
     fclose(f);
     return stwt(buf);
 }
 
-void clearWt(WorkTree* wt) {
+void freeWt(WorkTree* wt) {
     for(int i=0;i<wt->n;++i) {
         free(wt->tab[i].name);
         free(wt->tab[i].hash);
@@ -163,13 +168,12 @@ void clearWt(WorkTree* wt) {
  */
 char* blobWorkTree(WorkTree* wt) {
     char* fname = createTemp();
-    char* s = wttf(wt, fname);
+    wttf(wt, fname);
     char* hash = sha256file(fname);
     blobFileExt(fname);
     if(remove(fname))
         err("File removing error\n");
     free(fname);
-    free(s);
     return hash;
 }
 
@@ -180,7 +184,7 @@ WorkTree* getWtFromPath(char* path) {
         // err("f: %s\n", c->data);
         appendWorkTree(newWt, c->data, NULL, 0);
     }
-    clearList(l);
+    freeList(l);
     return newWt;
 }
 
@@ -202,7 +206,7 @@ char* saveWorkTree(WorkTree* wt, char* path) {
             WorkTree* newWt = getWtFromPath(buf);
             wt->tab[i].hash = saveWorkTree(newWt, buf);
             wt->tab[i].mode = getChmod(buf);
-            clearWt(newWt);
+            freeWt(newWt);
         } else {
             blobFile(buf);
             wt->tab[i].hash = sha256file(buf);

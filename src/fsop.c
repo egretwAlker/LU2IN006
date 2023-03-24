@@ -39,7 +39,7 @@ List* listdir(char* root_dir) {
 int file_exists(char* file) {
   List* l = listdir(".");
   int res = (searchList(l, file) != NULL);
-  clearList(l);
+  freeList(l);
   return res;
 }
 
@@ -66,12 +66,12 @@ void cp(char* dest, char* src) {
  * @return char* 
  */
 char* hashToPath(char* hash) {
-  int len = strlen(hash);
+  int len = (int)strlen(hash);
   if(len < 3) {
     err("Hash too short error");
     return NULL;
   }
-  char* s = malloc(sizeof(char)*(len+SPL+2));
+  char* s = malloc(sizeof(char)*(szt)(len+SPL+3));
   strcpy(s, SPFLDR);
   s[SPL] = '/';
   s[SPL+1] = hash[0];
