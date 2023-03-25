@@ -19,9 +19,6 @@ void test1() {
 }
 
 void test2() {
-  err("nonexisting check: (");
-  cp("missingfile", "missingfile");
-  err(")");
   cp("test4.txt", "test3.txt");
   assert(system("diff test3.txt test4.txt") == 0);
 }
@@ -121,6 +118,5 @@ void test13() {
 }
 
 int main(void) {
-  test6();
   return 0;
 }

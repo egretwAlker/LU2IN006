@@ -42,16 +42,10 @@ int file_exists(char* file) {
 
 void cp(char* dest, char* src) {
   FILE *d = fopen(dest, "w"), *s = fopen(src, "r");
-  if(d == NULL) {
-    err("Error when trying to open the file to write");
-  }
-  if(s == NULL) {
-    err("Error when trying to open the file to read");
-  }
+  assert(d); assert(s);
   char buf[MAXL];
-  while(fgets(buf, MAXL, s)) {
-    fprintf(d, "%s", buf);
-  }
+  int n = (int)fread(buf, sizeof(char), MAXL, s);
+  fwrite(buf, sizeof(char), (szt)n, d);
   fclose(d);
   fclose(s);
 }
