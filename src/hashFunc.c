@@ -4,21 +4,9 @@
 #include "fsop.h"
 #include <string.h>
 
-void append(char* s, const char* t) {
-  while(*s) ++s;
-  while(*t) {
-    *s = *t;
-    ++s; ++t;
-  }
-  *s = 0;
-}
-
 // Est-il possible de ne pas utiliser system, ce qui est préférable par l'énoncé?
 /**
  * @brief Use sha256sum to hash source and save to dest;
- * 
- * @param source 
- * @param dest 
  * @return int; -1 if failed
  */
 int hashFile(char* source, char* dest) {
@@ -35,9 +23,6 @@ int hashFile(char* source, char* dest) {
 
 /**
  * @brief Return the sha256sum result of file
- * 
- * @param file 
- * @return char* 
  */
 char* sha256file(char* file) {
   char* fname = createTemp();
@@ -49,6 +34,15 @@ char* sha256file(char* file) {
   char* res = strdup(buf);
 
   if(fclose(f)) err("File closing error\n");
+  if(remove(fname)) err("File removing error\n");
+  free(fname);
+  return res;
+}
+
+char* sha256string(char* s) {
+  char* fname = createTemp();
+  s2f(s, fname);
+  char* res = sha256file(fname);
   if(remove(fname)) err("File removing error\n");
   free(fname);
   return res;

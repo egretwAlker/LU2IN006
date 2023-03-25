@@ -1,11 +1,8 @@
 #include "fsop.h"
 #include "misc.h"
 #include <dirent.h>
-#include <string.h>
-#include <stdlib.h>
 #include "hashFunc.h"
 #include <unistd.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -83,42 +80,41 @@ char* hashToPath(char* hash) {
 
 /**
  * @brief Save the snapshot of file
- * 
- * @param file 
  */
 void blobFile(char* file) {
-  char* hash = sha256file(file);
-  char* path = hashToPath(hash);
-  // err("(%s)", hash);
-  path[SPL+3] = 0;
-  char cmd1[MAXL] = "mkdir -p ";
-  append(cmd1, path);
-  system(cmd1);
-  path[SPL+3] = '/';
-  cp(path, file);
-  free(hash);
-  free(path);
+  char*s = blobFileExt(file, "");
+  free(s);
 }
 
 /**
- * @brief Save the snapshot of file with extension .t
- * 
- * @param file 
+ * @brief Save the snapshot of file with extension ext like ".t" ".c" or ""
+ * @return Return the sha256 hash
  */
-void blobFileExt(char* file) {
+char* blobFileExt(char* file, char* ext) {
   char* hash = sha256file(file);
   char* path = hashToPath(hash);
-  // err("(%s)", hash);
   path[SPL+3] = 0;
   char cmd1[MAXL] = "mkdir -p ";
   append(cmd1, path);
   system(cmd1);
   path[SPL+3] = '/';
   strcpy(cmd1, path);
-  append(cmd1, ".t");
+  append(cmd1, ext);
   cp(cmd1, file);
-  free(hash);
   free(path);
+  return hash;
+}
+
+/**
+ * @brief Save the snapshop of string s and return the sha256 hash of it
+ */
+char* blobStringExt(char* s, char* ext) {
+  char* fname = createTemp();
+  s2f(s, fname);
+  char* hash = blobFileExt(fname, ext);
+  assert(remove(fname) == 0);
+  free(fname);
+  return hash;
 }
 
 /**
@@ -127,7 +123,7 @@ void blobFileExt(char* file) {
  * @return char* the name of the temporary file, starting by /tmp
  */
 char* createTemp() {
-  static const char template[] = "/tmp/iamhoviadinXXXXXX";
+  static const char template[] = "/tmp/iamhoviadinXXXXXXXX";
   char* fname = strdup(template);
   int fd = mkstemp(fname);
   close(fd);

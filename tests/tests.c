@@ -1,14 +1,9 @@
-#include <stdio.h>
-#include <assert.h>
 #include "../src/cellList.h"
 #include "../src/fsop.h"
 #include "../src/misc.h"
 #include "../src/hashFunc.h"
 #include "../src/workTree.h"
 #include "../src/gestionCommits.h"
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
 
 void test0() {
   char *s = sha256file("test1.txt");
@@ -97,15 +92,35 @@ void test11() {
   commitSet(c, "olex", "adin");
   char* s = cts(c);
   err("[%s]\n", s);
-  free(c);
+  freeCommit(c);
   Commit* a = stc(s);
   char* t = cts(a);
   err("[%s]\n", t);
   free(s);
   free(t);
+  freeCommit(a);
+}
+
+void test12() {
+  Commit* c = createCommit("123");
+  commitSet(c, "al", "hov");
+  ctf(c, "ctftest");
+  Commit* c1 = ftc("ctftest");
+  char *s = cts(c), *t = cts(c1);
+  err("%s\n", s);
+  assert(strcmp(s, t) == 0);
+  free(s); free(t);
+  freeCommit(c);
+  freeCommit(c1);
+}
+
+void test13() {
+  Commit* c = createCommit("thehash");
+  free(blobCommit(c));
+  freeCommit(c);
 }
 
 int main(void) {
-  test11();
+  test6();
   return 0;
 }

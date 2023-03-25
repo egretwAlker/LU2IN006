@@ -15,6 +15,7 @@ typedef struct {
 typedef HashTable Commit;
 kvp* createKeyVal(char* key, char* val);
 void freeKeyVal(kvp* kv);
+void freeCommit(Commit* c);
 char* kvts(const kvp* k);
 kvp* stkv(const char* s);
 Commit* stc(const char* s);
@@ -24,4 +25,7 @@ Commit* createCommit(char* hash);
 kvp* getKvpByKey(Commit* c, char* key);
 Commit* initCommit();
 void commitSet(Commit* c, char* key, char* value);
+void ctf(Commit* c, char* file);
+Commit* ftc(char* file);
+char* blobCommit(Commit* c);
 #endif

@@ -1,8 +1,6 @@
 #include "gestionCommits.h"
 #include "misc.h"
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
+#include "fsop.h"
 
 /**
  * @brief From http://www.cse.yorku.ca/~oz/hash.html
@@ -19,8 +17,7 @@ static unsigned long sdbm(char *s) {
 }
 
 kvp* createKeyVal(char* key, char* val) {
-  assert(key != NULL);
-  assert(val != NULL);
+  assert(key != NULL); assert(val != NULL);
   kvp* k = (kvp*)malloc(sizeof(kvp));
   k->key = strdup(key);
   k->value = val!=NULL?strdup(val):NULL;
@@ -90,8 +87,7 @@ Commit* initCommit() {
  * @brief Get the pointer to the corresponding kvp object
  */
 kvp* getKvpByKey(Commit* c, char* key) {
-  assert(c != NULL);
-  assert(key != NULL);
+  assert(c != NULL); assert(key != NULL);
   int h = (int)(sdbm(key)%(szt)COMMITN);
   while(c->T[h] != NULL && strcmp(key, c->T[h]->key)) h = (h+1)%COMMITN;
   if(c->T[h] == NULL) c->T[h] = createKeyVal(key, "");
@@ -102,8 +98,7 @@ kvp* getKvpByKey(Commit* c, char* key) {
  * @brief Add key:value pair into Commit c
  */
 void commitSet(Commit* c, char* key, char* value) {
-  assert(c != NULL);
-  assert(key != NULL);
+  assert(c != NULL); assert(key != NULL);
   kvp* k = getKvpByKey(c, key);
   free(k->value);
   k->value = strdup(value);
@@ -124,8 +119,7 @@ Commit* createCommit(char* hash) {
  * @return char* NULL if the key is not present
  */
 char* commitGet(Commit* c, char* key) {
-  assert(c != NULL);
-  assert(key != NULL);
+  assert(c != NULL); assert(key != NULL);
   kvp* k = getKvpByKey(c, key);
   return k->value;
 }
@@ -142,15 +136,10 @@ char* cts(Commit* c) {
   }
   char* s = (char*)malloc(sizeof(char)*(szt)tot);
   char* t = s;
-  for(int i=0;i<COMMITN;++i) {
-    if(c->T[i] != NULL) {
-      *(t++) = '('; strcpy(t, c->T[i]->key); t += strlen(t);
-      *(t++) = ','; strcpy(t, c->T[i]->value); t += strlen(t);
-      *(t++) = ')'; *(t++) = '\n';
-    }
+  for(int i=0;i<COMMITN;++i) if(c->T[i] != NULL) {
+    sprintf(t, "(%s,%s)\n", c->T[i]->key, c->T[i]->value);
+    t += strlen(t);
   }
-  t = 0;
-  // err("%c, %d, %d\n", s[0], strlen(s), tot);
   return s;
 }
 
@@ -167,4 +156,28 @@ Commit* stc(const char* s) {
     s += 4+strlen(buf1)+strlen(buf2);
   }
   return c;
+}
+
+void ctf(Commit* c, char* file) {
+  char* s = cts(c);
+  s2f(s, file);
+  free(s);
+}
+
+Commit* ftc(char* file) {
+  char* s = f2s(file);
+  Commit* c = stc(s);
+  free(s);
+  return c;
+}
+
+/**
+ * @brief Take a snapshot of Commit c with extension .c
+ * @return char* the hash of the string representation of c
+ */
+char* blobCommit(Commit* c) {
+  char* s = cts(c);
+  char* hash = blobStringExt(s, ".c");
+  free(s);
+  return hash;
 }

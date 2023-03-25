@@ -2,12 +2,9 @@
 #include "fsop.h"
 #include "hashFunc.h"
 #include "workTree.h"
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <string.h>
 
 void setMode(int mode, char * path) {
     char buff[100];
@@ -38,12 +35,7 @@ WorkFile* createWorkFile2(char* name, char* hash, int mode) {
  * @return char* 
  */
 char* wfts(WorkFile* wf) {
-    if(wf->name == NULL) {
-        err("name NULL error\n");
-    }
-    if(wf->hash == NULL) {
-        err("hash NULL error\n");
-    }
+    assert(wf->name != NULL); assert(wf->hash != NULL);
     char buf[MAXL];
     sprintf(buf,"%s\t%s\t%d", wf->name, wf->hash, wf->mode);
     return strdup(buf);
@@ -53,7 +45,6 @@ WorkFile* stwf(char* ch) {
     char buf1[MAXL], buf2[MAXL]; int buf3;
     sscanf(ch, "%s\t%s\t%d", buf1, buf2, &buf3);
     return createWorkFile2(buf1, buf2, buf3);
-    return createWorkFile(buf1);
 }
 
 void freeWf(WorkFile* wf) {
@@ -72,10 +63,6 @@ WorkTree* initWorkTree() {
 
 /**
  * @brief Return the position of file of folder named name in wt, -1 if not found
- * 
- * @param wt 
- * @param name 
- * @return int 
  */
 int inWorkTree(WorkTree* wt, char* name) {
     for(int i=0; i<wt->n; ++i) {
@@ -99,38 +86,32 @@ int appendWorkTree(WorkTree* wt, char* name, char* hash, int mode) {
 
 char* wtts(WorkTree* wt) {
     char buf[MAXL];
-    int l = 0;
+    char* p = buf;
     for(int i=0; i<wt->n; ++i) {
         char *s = wfts(&(wt->tab[i]));
-        sprintf(buf+l, "%s\n", s);
-        l += (int)strlen(s)+1;
+        sprintf(p, "%s\n", s);
+        p += strlen(p);
         free(s);
     }
     return strdup(buf);
 }
 
-WorkTree* stwt(char* s) {
+WorkTree* stwt(const char* s) {
     WorkTree* wt = initWorkTree();
     char buf[MAXL];
-    int p = 0, n = (int)strlen(s);
-    while(p < n) {
-        int t = 0;
-        while(p<n && s[p] != '\n') buf[t++] = s[p++];
-        ++p; buf[t] = 0;
+    while(*s) {
+        sscanf(s, "%[^\n]", buf);
         WorkFile *wf = stwf(buf);
-        if(appendWorkTree(wt, wf->name, wf->hash, wf->mode) == -1)
-            err("Appending error\n");
+        assert(appendWorkTree(wt, wf->name, wf->hash, wf->mode) == 0);
         freeWf(wf);
+        s += strlen(buf)+1;
     }
     return wt;
 }
 
 int wttf(WorkTree* wt, char* file) {
     FILE* f = fopen(file, "w");
-    if(!f) {
-        err("Error while opening the file\n");
-        return -1;
-    }
+    assert(f);
     char* s = wtts(wt);
     fprintf(f, "%s", s);
     free(s);
@@ -138,12 +119,9 @@ int wttf(WorkTree* wt, char* file) {
     return 0;
 }
 
-WorkTree* ftwt(char* file) {
+WorkTree* ftwt(const char* file) {
     FILE* f = fopen(file, "r");
-    if(!f) {
-        err("Error while opening the file\n");
-        return NULL;
-    }
+    assert(f);
     char buf[MAXL];
     int m = (int)fread(buf, MAXL-1, sizeof(char), f);
     buf[m] = 0;
@@ -161,19 +139,13 @@ void freeWt(WorkTree* wt) {
 }
 
 /**
- * @brief Create a temporary file containing the content of wt and take a snapshot of it
- * 
- * @param wt 
- * @return char* the hash of the temporary file
+ * @brief Take a snapshot of WorkTree wt with extension .t
+ * @return char* the hash of the string representation of wt
  */
 char* blobWorkTree(WorkTree* wt) {
-    char* fname = createTemp();
-    wttf(wt, fname);
-    char* hash = sha256file(fname);
-    blobFileExt(fname);
-    if(remove(fname))
-        err("File removing error\n");
-    free(fname);
+    char* s = wtts(wt);
+    char* hash = blobStringExt(s, ".t");
+    free(s);
     return hash;
 }
 
@@ -191,10 +163,6 @@ WorkTree* getWtFromPath(char* path) {
 /**
  * @brief Create a snapshot of the files and folders of wt at path
  * and fill in the hash and mode entry
- * 
- * @param wt
- * @param path 
- * @return char* 
  */
 char* saveWorkTree(WorkTree* wt, char* path) {
     for(int i=0;i<wt->n;++i) {

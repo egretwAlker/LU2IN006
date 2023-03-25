@@ -28,8 +28,8 @@ int appendWorkTree(WorkTree* wt, char* name, char* hash, int
 mode);
 char* wtts(WorkTree* wt);
 int wttf(WorkTree* wt, char* file);
-WorkTree* ftwt(char* file);
-WorkTree* stwt(char* s);
+WorkTree* ftwt(const char* file);
+WorkTree* stwt(const char* s);
 void freeWt(WorkTree* wt);
 char* blobWorkTree(WorkTree* wt);
 char* saveWorkTree(WorkTree* wt, char* path);
