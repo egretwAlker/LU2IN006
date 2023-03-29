@@ -181,3 +181,51 @@ char* blobCommit(Commit* c) {
   free(s);
   return hash;
 }
+
+void initRefs() {
+  char buff[MAXL];
+  sprintf(buff, "%s/.refs", SPFLDR);
+  if (!file_exists(buff)){
+    sprintf(buff, "mkdir %s/.refs", SPFLDR);
+    system(buff);
+    sprintf(buff, "touch %s/.refs/master", SPFLDR);
+    system(buff);
+    sprintf(buff, "touch %s/.refs/HEAD", SPFLDR);
+    system(buff);
+  }
+}
+
+void createUpdateRef(char* ref_name, char* hash) {
+  char buff[MAXL];
+  sprintf(buff, "echo %s > %s/.refs/%s", hash, SPFLDR, ref_name);
+  system(buff);
+}
+
+void deleteRef(char* ref_name) {
+  char buff[MAXL];
+  sprintf(buff, "%s/.refs/%s", SPFLDR, ref_name);
+  if (!file_exists(buff)){
+    err("The reference %s does not exist\n", ref_name);
+  } else {
+    assert(remove(buff) == 0);
+  }
+}
+
+/**
+ * @brief
+ * @return Content of ref_name, NULL if non existing; "" if empty
+ */
+char *getRef(char* ref_name) {
+  FILE *fp;
+  char *result = (char*)malloc(sizeof(char)*MAXL);
+  char buff[MAXL];
+  sprintf(buff, "%s/.refs/%s",SPFLDR, ref_name );
+  if (!file_exists(buff)){
+    err("The reference %s does not exist\n", ref_name);
+  }
+  fp = fopen(buff, "r");
+  assert(fp);
+  fread(result, sizeof(char), MAXL, fp);
+  fclose(fp);
+  return result;
+}

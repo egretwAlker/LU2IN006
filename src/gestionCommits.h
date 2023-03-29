@@ -28,4 +28,8 @@ void commitSet(Commit* c, char* key, char* value);
 void ctf(Commit* c, char* file);
 Commit* ftc(char* file);
 char* blobCommit(Commit* c);
+void initRefs();
+void createUpdateRef(char* ref_name, char* hash);
+void deleteRef(char * ref_name);
+char *getRef(char* ref_name);
 #endif
