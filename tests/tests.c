@@ -117,6 +117,16 @@ void test13() {
   freeCommit(c);
 }
 
+void test14() {
+  WorkTree* newWt = getWtFromPath(".");
+  char *s = saveWorkTree(newWt, ".");
+  free(s);
+  system("rm -r fdt");
+  restoreWorkTree(newWt, ".");
+  freeWt(newWt);
+}
+
 int main(void) {
+  test14();
   return 0;
 }

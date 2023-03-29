@@ -17,7 +17,6 @@ typedef struct {
     int n;
 } WorkTree;
 
-void setMode(int mode, char* path);
 WorkFile* createWorkFile(char* name);
 char* wfts(WorkFile* wf);
 WorkFile* stwf(char* ch);
@@ -34,4 +33,5 @@ void freeWt(WorkTree* wt);
 char* blobWorkTree(WorkTree* wt);
 char* saveWorkTree(WorkTree* wt, char* path);
 WorkTree* getWtFromPath(char* path);
+void restoreWorkTree(WorkTree* wt, char* path);
 #endif

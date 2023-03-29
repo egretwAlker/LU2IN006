@@ -34,14 +34,13 @@ List* listdir(char* root_dir) {
  * @return int 1 if file (can be a folder) exists at the depth 1
  */
 int file_exists(char* file) {
-  List* l = listdir(".");
-  int res = (searchList(l, file) != NULL);
-  freeList(l);
-  return res;
+  struct stat buffer;
+  return (stat(file, &buffer) == 0);
 }
 
 void cp(char* dest, char* src) {
   FILE *d = fopen(dest, "w"), *s = fopen(src, "r");
+  // err("dest: %s, src: %s\n", dest, src);
   assert(d); assert(s);
   char buf[MAXL];
   int n = (int)fread(buf, sizeof(char), MAXL, s);
@@ -70,6 +69,13 @@ char* hashToPath(char* hash) {
   s[SPL+3] = '/';
   strcpy(s+SPL+4, hash+2);
   return s;
+}
+
+char* hashToPathExt(char* hash, char* ext) {
+  char* s = hashToPath(hash);
+  char* res = newconcat(s, ext);
+  free(s);
+  return res;
 }
 
 /**
@@ -124,12 +130,16 @@ char* createTemp() {
   return fname;
 }
 
+void setMode(int mode, char * path) {
+    char buff[MAXL];
+    // err("!!mode: %d %o\n", mode, mode);
+    sprintf(buff, "chmod %o %s", mode, path);
+    system(buff);
+}
+
 int getChmod(const char * path) {
     struct stat ret;
-
-    if(stat(path, &ret) == -1) {
-        return -1;
-    }
+    assert(stat(path, &ret) != -1);
 
     // Copied from the poly, but Wouldn't that be ret.st_mode & (...|...)
     return ( ret.st_mode & S_IRUSR ) | ( ret.st_mode & S_IWUSR ) | ( ret.st_mode & S_IXUSR ) |

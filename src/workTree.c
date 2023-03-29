@@ -6,11 +6,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-void setMode(int mode, char * path) {
-    char buff[100];
-    sprintf(buff, "chmod %d %s", mode, path);
-    system(buff);
-}
 
 WorkFile* createWorkFile(char* name) {
     WorkFile* new = (WorkFile*)malloc(sizeof(WorkFile));
@@ -160,26 +155,64 @@ WorkTree* getWtFromPath(char* path) {
     return newWt;
 }
 
+char* concatPaths(char* p1, char* p2) {
+    int n = (int)strlen(p1)+(int)strlen(p2)+2;
+    char* s = malloc(sizeof(char)*(szt)n);
+    strcpy(s, p1);
+    append(s, "/");
+    append(s, p2);
+    return s;
+}
+
 /**
  * @brief Create a snapshot of the files and folders of wt at path
  * and fill in the hash and mode entry
  */
 char* saveWorkTree(WorkTree* wt, char* path) {
     for(int i=0;i<wt->n;++i) {
-        char buf[MAXL];
-        strcpy(buf, path);
-        append(buf, "/");
-        append(buf, wt->tab[i].name);
-        if(isDir(buf)) {
-            WorkTree* newWt = getWtFromPath(buf);
-            wt->tab[i].hash = saveWorkTree(newWt, buf);
-            wt->tab[i].mode = getChmod(buf);
+        char* fp = concatPaths(path, wt->tab[i].name);
+        if(isDir(fp)) {
+            WorkTree* newWt = getWtFromPath(fp);
+            wt->tab[i].hash = saveWorkTree(newWt, fp);
+            wt->tab[i].mode = getChmod(fp);
             freeWt(newWt);
         } else {
-            blobFile(buf);
-            wt->tab[i].hash = sha256file(buf);
-            wt->tab[i].mode = getChmod(buf);
+            blobFile(fp);
+            wt->tab[i].hash = sha256file(fp);
+            wt->tab[i].mode = getChmod(fp);
         }
+        free(fp);
     }
     return blobWorkTree(wt);
+}
+
+int isWorkTree(char* hash) {
+    char* s = hashToPathExt(hash, ".t");
+    int res = file_exists(s);
+    free(s);
+    return res;
+}
+
+void restoreWorkTree(WorkTree* wt, char* path) {
+    char* cmd = newconcat("mkdir -p ", path);
+    assert(system(cmd) == 0);
+    free(cmd);
+    for(int i=0; i<wt->n; ++i) {
+        char* fp = concatPaths(path, wt->tab[i].name);
+        char* hp;
+        // err("name: %s, %s\n", wt->tab[i].name, wt->tab[i].hash);
+        if(isWorkTree(wt->tab[i].hash)) {
+            hp = hashToPathExt(wt->tab[i].hash, ".t");
+            WorkTree* nwt = ftwt(hp);
+            restoreWorkTree(nwt, fp);
+            setMode(wt->tab[i].mode, fp);
+            freeWt(nwt);
+        } else {
+            hp = hashToPath(wt->tab[i].hash);
+            cp(fp, hp);
+            setMode(wt->tab[i].mode, fp);
+        }
+        free(fp);
+        free(hp);
+    }
 }

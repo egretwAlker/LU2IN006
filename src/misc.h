@@ -11,6 +11,7 @@
 #define SPL ((int)strlen(SPFLDR))
 #define COMMITN 23333
 void append(char* s, const char* t);
+char* newconcat(const char* s, const char* t);
 void s2f(const char* s, const char* fn);
 char* f2s(const char* fn);
 typedef unsigned long ul;

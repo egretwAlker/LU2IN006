@@ -31,3 +31,14 @@ char* f2s(const char* fn) {
   fclose(f);
   return s;
 }
+
+/**
+ * @brief Get concatenated result of s and t
+ */
+char* newconcat(const char* s, const char* t) {
+  int n = (int)strlen(s), m = (int)strlen(t);
+  char* res = (char*)malloc(sizeof(char)*(szt)(n+m+1));
+  strcpy(res, s);
+  strcat(res, t);
+  return res;
+}
