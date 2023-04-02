@@ -14,25 +14,25 @@ typedef struct {
 } HashTable;
 
 typedef HashTable Commit;
-kvp* createKeyVal(char* key, char* val);
+kvp* createKeyVal(const char* key, const char* val);
 void freeKeyVal(kvp* kv);
 void freeCommit(Commit* c);
 char* kvts(const kvp* k);
 kvp* stkv(const char* s);
 Commit* stc(const char* s);
 char* cts(Commit* c);
-char* commitGet(Commit* c, char* key);
-Commit* createCommit(char* hash);
-kvp* getKvpByKey(Commit* c, char* key);
+char* commitGet(Commit* c, const char* key);
+Commit* createCommit(const char* hash);
+kvp* getKvpByKey(Commit* c, const char* key);
 Commit* initCommit();
-void commitSet(Commit* c, char* key, char* value);
-void ctf(Commit* c, char* file);
-Commit* ftc(char* file);
+void commitSet(Commit* c, const char* key, const char* value);
+void ctf(Commit* c, const char* file);
+Commit* ftc(const char* file);
 char* blobCommit(Commit* c);
 void initRefs();
-void createUpdateRef(char* ref_name, char* hash);
-void deleteRef(char * ref_name);
-char* getRef(char* ref_name);
-void myGitAdd(char* file_or_folder);
-void myGitCommit(char* branch_name, char* message);
+void createUpdateRef(const char* ref_name, const char* hash);
+void deleteRef(const char * ref_name);
+char* getRef(const char* ref_name);
+void myGitAdd(const char* file_or_folder);
+void myGitCommit(const char* branch_name, const char* message);
 #endif

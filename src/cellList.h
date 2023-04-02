@@ -14,16 +14,19 @@ Data format:
 */
 
 List* initList();
-Cell* buildCell(char* s);
+Cell* buildCell(const char* s);
 void insertFirst(List* l, Cell* c);
-void insertFirstString(List* l, char* s);
+void insertFirstString(List* l, const char* s);
+List* filterList(const List* l, const char* pattern);
 char* ctos(Cell* c);
 char* ltos(List* l);
 Cell* listGet(List* l, int k);
-Cell* searchList(List* l, char* s);
+Cell* searchList(List* l, const char* s);
+int listSize(const List* l);
 List* stol(const char* s);
-void ltof(List* l, char* path);
-List* ftol(char* path);
+void ltof(List* l, const char* path);
+List* ftol(const char* path);
 void freeCell(Cell* c);
 void freeList(List *l);
+void extendUnique(List* a, List* b);
 #endif

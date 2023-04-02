@@ -8,3 +8,6 @@ bin/%.o: src/%.c
 
 bin/%.exe: src/%.c
 	$(GCC) $^ -o $@
+
+clean:
+	rm bin/*

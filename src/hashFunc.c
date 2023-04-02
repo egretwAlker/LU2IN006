@@ -40,3 +40,11 @@ char* sha256string(const char* s) {
   free(fname);
   return res;
 }
+
+/**
+ * @param h 
+ * @return h != NULL && strlen(h) > 0
+ */
+int hashValid(const char* h) {
+  return h != NULL && strlen(h) > 0;
+}

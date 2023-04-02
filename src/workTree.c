@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 
-WorkFile* createWorkFile(char* name) {
+WorkFile* createWorkFile(const char* name) {
     WorkFile* new = (WorkFile*)malloc(sizeof(WorkFile));
     new->name = strdup(name);
     new->hash = NULL;
@@ -15,7 +15,7 @@ WorkFile* createWorkFile(char* name) {
     return new;
 }
 
-WorkFile* createWorkFile2(char* name, char* hash, int mode) {
+WorkFile* createWorkFile2(const char* name, const char* hash, int mode) {
     WorkFile* new = (WorkFile*)malloc(sizeof(WorkFile));
     new->name = strdup(name);
     new->hash = hash == NULL ? NULL : strdup(hash);
@@ -36,10 +36,18 @@ char* wfts(WorkFile* wf) {
     return strdup(buf);
 }
 
-WorkFile* stwf(char* ch) {
+WorkFile* stwf(const char* ch) {
     char buf1[MAXL], buf2[MAXL]; int buf3;
     sscanf(ch, "%s\t%s\t%d", buf1, buf2, &buf3);
     return createWorkFile2(buf1, buf2, buf3);
+}
+
+WorkTree* htwt(const char* hash) {
+    assert(hashValid(hash));
+    char* s = hashToPathExt(hash, ".t");
+    WorkTree* res = stwt(s);
+    free(s);
+    return res;
 }
 
 void freeWf(WorkFile* wf) {
@@ -59,7 +67,7 @@ WorkTree* initWorkTree() {
 /**
  * @brief Return the position of file of folder named name in wt, -1 if not found
  */
-int inWorkTree(WorkTree* wt, char* name) {
+int inWorkTree(WorkTree* wt, const char* name) {
     for(int i=0; i<wt->n; ++i) {
         if(strcmp(wt->tab[i].name, name) == 0)
             return i;
@@ -67,7 +75,7 @@ int inWorkTree(WorkTree* wt, char* name) {
     return -1;
 }
 
-int appendWorkTree(WorkTree* wt, char* name, char* hash, int mode) {
+int appendWorkTree(WorkTree* wt, const char* name, const char* hash, int mode) {
     if(wt->size == wt->n) {
         err("WorkTree full error\n");
         return -1;
@@ -104,7 +112,7 @@ WorkTree* stwt(const char* s) {
     return wt;
 }
 
-int wttf(WorkTree* wt, char* file) {
+int wttf(WorkTree* wt, const char* file) {
     char* s = wtts(wt);
     stf(s, file);
     free(s);
@@ -138,7 +146,7 @@ char* blobWorkTree(WorkTree* wt) {
     return hash;
 }
 
-WorkTree* getWtFromPath(char* path) {
+WorkTree* getWtFromPath(const char* path) {
     WorkTree* newWt = initWorkTree();
     List* l = listdir(path);
     for(Cell* c = *l; c; c = c->next) {
@@ -149,7 +157,7 @@ WorkTree* getWtFromPath(char* path) {
     return newWt;
 }
 
-char* concatPaths(char* p1, char* p2) {
+char* concatPaths(const char* p1, const char* p2) {
     int n = (int)strlen(p1)+(int)strlen(p2)+2;
     char* s = malloc(sizeof(char)*(szt)n);
     strcpy(s, p1);
@@ -159,7 +167,7 @@ char* concatPaths(char* p1, char* p2) {
 }
 
 /**
- * @brief This is an adhoc fonction to saveWorkTree, hash pointer points to the new hash
+ * @brief This is an adhoc fonction to saveWorkTree, hash pointer points to the new hash, take the ownership of hash
  */
 void updateWf(WorkFile* wf, char* hash, int mode) {
     free(wf->hash);
@@ -171,7 +179,7 @@ void updateWf(WorkFile* wf, char* hash, int mode) {
  * @brief Create a snapshot of the files and folders of wt at path
  * and fill in the hash and mode entry
  */
-char* saveWorkTree(WorkTree* wt, char* path) {
+char* saveWorkTree(WorkTree* wt, const char* path) {
     for(int i=0;i<wt->n;++i) {
         char* fp = concatPaths(path, wt->tab[i].name);
         if(isDir(fp)) {
@@ -187,14 +195,14 @@ char* saveWorkTree(WorkTree* wt, char* path) {
     return blobWorkTree(wt);
 }
 
-int isWorkTree(char* hash) {
+int isWorkTree(const char* hash) {
     char* s = hashToPathExt(hash, ".t");
     int res = file_exists(s);
     free(s);
     return res;
 }
 
-void restoreWorkTree(WorkTree* wt, char* path) {
+void restoreWorkTree(WorkTree* wt, const char* path) {
     char* cmd = newconcat("mkdir -p ", path);
     assert(system(cmd) == 0);
     free(cmd);

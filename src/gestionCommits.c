@@ -7,7 +7,7 @@
 /**
  * @brief From http://www.cse.yorku.ca/~oz/hash.html
  */
-static unsigned long sdbm(char *s) {
+static unsigned long sdbm(const char *s) {
   unsigned char *str = (unsigned char*)s;
   unsigned long hash = 0;
   int c;
@@ -18,7 +18,7 @@ static unsigned long sdbm(char *s) {
   return hash;
 }
 
-kvp* createKeyVal(char* key, char* val) {
+kvp* createKeyVal(const char* key, const char* val) {
   assert(key != NULL); assert(val != NULL);
   kvp* k = (kvp*)malloc(sizeof(kvp));
   k->key = strdup(key);
@@ -88,7 +88,7 @@ Commit* initCommit() {
 /**
  * @brief Get the pointer to the corresponding kvp object
  */
-kvp* getKvpByKey(Commit* c, char* key) {
+kvp* getKvpByKey(Commit* c, const char* key) {
   assert(c != NULL); assert(key != NULL);
   int h = (int)(sdbm(key)%(szt)COMMITN);
   while(c->T[h] != NULL && strcmp(key, c->T[h]->key)) h = (h+1)%COMMITN;
@@ -99,7 +99,7 @@ kvp* getKvpByKey(Commit* c, char* key) {
 /**
  * @brief Add key:value pair into Commit c
  */
-void commitSet(Commit* c, char* key, char* value) {
+void commitSet(Commit* c, const char* key, const char* value) {
   assert(c != NULL); assert(key != NULL);
   kvp* k = getKvpByKey(c, key);
   free(k->value);
@@ -109,7 +109,7 @@ void commitSet(Commit* c, char* key, char* value) {
 /**
  * @brief Create a Commit object with "tree":hash in it
  */
-Commit* createCommit(char* hash) {
+Commit* createCommit(const char* hash) {
   Commit* c = initCommit();
   commitSet(c, "tree", hash);
   return c;
@@ -118,9 +118,9 @@ Commit* createCommit(char* hash) {
 /**
  * @brief Get the corresponding value of key
  * 
- * @return char* NULL if the key is not present
+ * @return char* NULL if the key is not present, not giving the ownership
  */
-char* commitGet(Commit* c, char* key) {
+char* commitGet(Commit* c, const char* key) {
   assert(c != NULL); assert(key != NULL);
   kvp* k = getKvpByKey(c, key);
   return k->value;
@@ -161,17 +161,22 @@ Commit* stc(const char* s) {
   return c;
 }
 
-void ctf(Commit* c, char* file) {
+void ctf(Commit* c, const char* file) {
   char* s = cts(c);
   s2f(s, file);
   free(s);
 }
 
-Commit* ftc(char* file) {
+Commit* ftc(const char* file) {
   char* s = f2s(file);
   Commit* c = stc(s);
   free(s);
   return c;
+}
+
+Commit* htc(const char* hash) {
+  assert(hashValid(hash));
+  return ftc(hashToPathExt(hash, ".c"));
 }
 
 /**
@@ -200,13 +205,13 @@ void initRefs() {
 /**
  * @brief Replace the content of ref_name by hash, create the ref file if non existing
  */
-void createUpdateRef(char* ref_name, char* hash) {
+void createUpdateRef(const char* ref_name, const char* hash) {
   char buff[MAXL];
   sprintf(buff, "%s/%s", REF, ref_name);
   stf(hash, buff);
 }
 
-void deleteRef(char* ref_name) {
+void deleteRef(const char* ref_name) {
   char buff[MAXL];
   sprintf(buff, "%s/%s", REF, ref_name);
   if (!file_exists(buff)){
@@ -220,7 +225,7 @@ void deleteRef(char* ref_name) {
  * @brief
  * @return Content of ref_name, NULL if non existing; "" if empty
  */
-char* getRef(char* ref_name) {
+char* getRef(const char* ref_name) {
   char buf[MAXL];
   sprintf(buf, "%s/%s", REF, ref_name);
   if (!file_exists(buf)){
@@ -235,7 +240,7 @@ char* getRef(char* ref_name) {
  * 
  * @param fn path to of a file or a folder
  */
-void myGitAdd(char* fn) {
+void myGitAdd(const char* fn) {
   if(file_exists(fn) == 0) {
     err("File does not exist\n");
     return;
@@ -258,7 +263,7 @@ void myGitAdd(char* fn) {
   freeWt(wt);
 }
 
-void myGitCommit(char* branch_name, char* message) {
+void myGitCommit(const char* branch_name, const char* message) {
   if(!file_exists(REF)) {
     err("Il faut d'abord initialiser les references du projets\n");
     return;
@@ -295,4 +300,115 @@ void myGitCommit(char* branch_name, char* message) {
   } else err("HEAD doit pointer sur le dernier commit de la branche");
   free(last_hash);
   free(head_hash);
+}
+
+// untested
+void initBranch() {
+  stf("master", CURB);
+}
+
+// untested
+int branchExists(const char* branch) {
+  List* refs = listdir(REF);
+  int res = (searchList(refs, branch) != NULL);
+  freeList(refs);
+  return res;
+}
+
+// untested
+void createBranch(const char* branch) {
+  char* hash = getRef("HEAD");
+  createUpdateRef(branch, hash);
+  free(hash);
+}
+
+// untested
+char* getCurrentBranch() {
+  return fts(CURB);
+}
+
+// untested
+void printBranch(const char* branch) {
+  char* h = getRef(branch);
+  while(hashValid(h)) {
+    Commit* c = htc(h);
+    if(commitGet(c, "message") != NULL)
+      printf("%s -> %s\n", h, commitGet(c, "message"));
+    else
+      printf("%s\n", h);
+    free(h);
+    h = commitGet(c, "predecessor");
+    free(c);
+  }
+  free(h);
+}
+
+// untested
+List* branchList(const char* branch) {
+  List* l = initList();
+  char* h = getRef(branch);
+  while(hashValid(h)) {
+    Commit* c = htc(h);
+    insertFirst(l, buildCell(h));
+    free(h);
+    h = commitGet(c, "predecessor");
+    free(c);
+  }
+  free(h);
+  return l;
+}
+
+// untested
+List* getAllCommits() {
+  List* l = initList();
+  List* branches = listdir(REF);
+  for(Cell* c = *branches; c; c=c->next) {
+    extendUnique(l, branchList(c->data));
+  }
+  freeList(branches);
+  return l;
+}
+
+// untested
+void restoreCommit(const char* hash_commit) {
+  Commit* c = htc(hash_commit);
+  char* hash_tree = commitGet(c, "tree");
+  WorkTree* wt = htwt(hash_tree);
+  restoreWorkTree(wt, ".");
+  freeWt(wt);
+  free(hash_tree);
+  freeCommit(c);
+}
+
+// untested
+void myGitCheckoutBranch(const char* branch) {
+  stf(branch, CURB);
+  char* h = getRef(branch);
+  createUpdateRef("HEAD", h);
+  restoreCommit(h);
+  free(h);
+}
+
+// untested
+/**
+ * @brief Show information about commits whose hashes start by pattern
+ * 
+ * @param pattern 
+ */
+void myGitCheckoutCommit(const char* pattern) {
+  List* l = getAllCommits();
+  List* filtered = filterList(l, pattern);
+  int sz = listSize(filtered);
+  if(sz == 0) {
+    printf("Pattern not matched\n");
+  } else {
+    if(sz > 1) {
+      printf("Multiple matching found:\n");
+      for(Cell* c = *filtered; c; c=c->next) {
+        printf("-> %s\n", c->data);
+      }
+    }
+  }
+  freeList(l);
+  freeList(filtered);
 }

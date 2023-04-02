@@ -10,6 +10,7 @@
 #define SPFLDR ".mygit"
 #define REF ".mygit/.ref"
 #define ADD ".mygit/.add"
+#define CURB ".mygit/.current_branch"
 #define SPL ((int)strlen(SPFLDR))
 #define COMMITN 23333
 void append(char* s, const char* t);

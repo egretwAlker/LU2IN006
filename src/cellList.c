@@ -10,20 +10,56 @@ List* initList() {
 /**
  * @brief With strdup, create a cell representing s
  */
-Cell* buildCell(char* s) {
+Cell* buildCell(const char* s) {
   Cell* res = malloc(sizeof(Cell));
   res->data = strdup(s);
   res->next = NULL;
   return res;
 }
 
+/**
+ * @brief Absorb the ownership of c
+ */
 void insertFirst(List* l, Cell* c) {
   c->next = *l;
   *l = c;
 }
 
-void insertFirstString(List* l, char* s) {
+void insertFirstString(List* l, const char* s) {
   insertFirst(l, buildCell(s));
+}
+
+/**
+ * @brief insertFirst every element of b to a when it's datum doesn't exist there, take the ownership of b
+ */
+void extendUnique(List* a, List* b) {
+  for(Cell *c = *b, *t; c; c = t) {
+    t = c->next;
+    if(searchList(a, c->data) == NULL) insertFirst(a, c);
+    else freeCell(c);
+  }
+  free(b);
+}
+
+/**
+ * @brief Don't take the ownership of elements in l
+ * @return List* within are all the elements in l starting by pattern
+ */
+List* filterList(const List* l, const char* pattern) {
+  szt np = strlen(pattern);
+  List* res = initList();
+  for(const Cell* c = *l; c; c = c->next) {
+    if(strncmp(c->data, pattern, np) == 0)
+      insertFirst(res, buildCell(c->data));
+  }
+  return res;
+}
+
+int listSize(const List* l) {
+  assert(l != NULL);
+  int cnt = 0;
+  for(const Cell* c = *l; c; c = c->next) ++cnt;
+  return cnt;
 }
 
 /**
@@ -69,7 +105,7 @@ Cell* listGet(List* l, int k) {
 /**
  * @brief Return the first cell of which the data equals to s or NULL if not found.
  */
-Cell* searchList(List* l, char* s) {
+Cell* searchList(List* l, const char* s) {
  if(l == NULL) return NULL;
  for(Cell *c = *l; c; c=c->next) if(strcmp(c->data, s)==0) return c;
  return NULL;
@@ -94,12 +130,12 @@ List* stol(const char* s) {
   return l;
 }
 
-void ltof(List* l, char* path) {
+void ltof(List* l, const char* path) {
   char *s = ltos(l);
   s2f(s, path);
 }
 
-List* ftol(char* path) {
+List* ftol(const char* path) {
   char* s = f2s(path);
   List* res = stol(s);
   free(s);

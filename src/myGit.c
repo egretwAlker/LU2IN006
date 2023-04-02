@@ -32,14 +32,14 @@ void list_add() {
 }
 
 void help() {
-    err("myGit init\n");
-    err("myGit list-refs\n");
-    err("myGit create-ref name hash\n");
-    err("myGit delete-ref name\n");
-    err("myGit add <elem> [<elem2> <elem3> ...]\n");
-    err("myGit list-add\n");
-    err("myGit clear-add\n");
-    err("myGit commit <branch-name> [-m <message>]\n");
+    printf("myGit init\n");
+    printf("myGit list-refs\n");
+    printf("myGit create-ref name hash\n");
+    printf("myGit delete-ref name\n");
+    printf("myGit add <elem> [<elem2> <elem3> ...]\n");
+    printf("myGit list-add\n");
+    printf("myGit clear-add\n");
+    printf("myGit commit <branch-name> [-m <message>]\n");
 }
 
 int main(int argc, char* argv[]){
