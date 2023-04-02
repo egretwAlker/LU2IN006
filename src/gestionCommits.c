@@ -233,7 +233,7 @@ char *getRef(char* ref_name) {
 
 void createFile(char* file){
   char buff[MAXL];
-  sprintf(buff, "touch %s/%s", SPFLDR, file);
+  sprintf(buff, "touch %s", file);
   system(buff);
 }
 
