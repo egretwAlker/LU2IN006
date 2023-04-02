@@ -1,6 +1,7 @@
 #include "gestionCommits.h"
 #include "misc.h"
 #include "fsop.h"
+#include "workTree.h"
 
 /**
  * @brief From http://www.cse.yorku.ca/~oz/hash.html
@@ -225,7 +226,68 @@ char *getRef(char* ref_name) {
   }
   fp = fopen(buff, "r");
   assert(fp);
-  fread(result, sizeof(char), MAXL, fp);
+  fread(result, sizeof(char),MAXL, fp);
   fclose(fp);
   return result;
+}
+
+void createFile(char* file){
+  char buff[MAXL];
+  sprintf(buff, "touch %s/%s", SPFLDR, file);
+  system(buff);
+}
+
+void myGitAdd(char* file_or_folder){
+  WorkTree* wt;
+  char buff[MAXL];
+  sprintf(buff, "%s/.add", SPFLDR);
+  if (!file_exists(buff)){
+    createFile(buff);
+    wt = initWorkTree();
+  } else {
+    wt = ftwt(buff);
+  }
+  assert(file_exists(file_or_folder));
+  appendWorkTree(wt, file_or_folder, NULL, 0);
+  wttf(wt, buff);
+  freeWt(wt);
+}
+
+void myGitCommit(char* branch_name, char* message){
+  char buff[MAXL];
+  sprintf(buff, "%s/.refs", SPFLDR);
+  if(!file_exists(buff)){
+    err("Il faut d'abord initialiser les references du projets\n");
+    return;
+  }
+  char buff2[MAXL];
+  sprintf(buff2, "%s/.refs/%s", SPFLDR, branch_name);
+  if(!file_exists(buff2)){
+    err("La branche n'existe pas\n");
+    return;
+  }
+  char* last_hash = getRef(branch_name);
+  char* head_hash = getRef("HEAD");
+  if(strcmp(last_hash, head_hash)!=0){
+    err("HEAD doit pointer sur le dernier commit de la branche");
+    return;
+  }
+  char buff3[MAXL];
+  sprintf(buff3, "%s/.add", SPFLDR);
+  WorkTree* wt = ftwt(buff3);
+  char buff4[MAXL];
+  sprintf(buff4, "%s/.", SPFLDR);
+  char *hashwt = saveWorkTree(wt, buff4);
+  Commit* c = createCommit(hashwt);
+  if(strlen(last_hash)!=0){
+    commitSet(c, "predecessor", last_hash);
+  } 
+  if(message != NULL){
+    commitSet(c, "message", message);
+  }
+  char* hashc = blobCommit(c);
+  createUpdateRef(branch_name, hashc);
+  createUpdateRef("HEAD", hashc);
+  assert(!remove(buff3));
+  free(wt);
 }
