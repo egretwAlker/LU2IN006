@@ -126,7 +126,15 @@ void test14() {
   freeWt(newWt);
 }
 
+void test15() {
+  initRefs();
+  createUpdateRef("main", "gank");
+  char* s = getRef("main");
+  err("%s\n", s);
+  free(s);
+}
+
 int main(void) {
-  test14();
+  test15();
   return 0;
 }

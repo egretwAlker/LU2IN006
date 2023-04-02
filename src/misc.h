@@ -8,6 +8,8 @@
 #define MAXL 2333
 #define WTS 100
 #define SPFLDR ".mygit"
+#define REF ".mygit/.ref"
+#define ADD ".mygit/.add"
 #define SPL ((int)strlen(SPFLDR))
 #define COMMITN 23333
 void append(char* s, const char* t);

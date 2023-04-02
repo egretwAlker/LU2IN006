@@ -1,5 +1,6 @@
 #ifndef GESTIONCOMMITS
 #define GESTIONCOMMITS
+// reference files can be non existing, empty (point to none), or non empty
 // key, value are never NULL
 typedef struct {
   char* key;
@@ -31,8 +32,7 @@ char* blobCommit(Commit* c);
 void initRefs();
 void createUpdateRef(char* ref_name, char* hash);
 void deleteRef(char * ref_name);
-char *getRef(char* ref_name);
-void createFile(char* file);
+char* getRef(char* ref_name);
 void myGitAdd(char* file_or_folder);
 void myGitCommit(char* branch_name, char* message);
 #endif

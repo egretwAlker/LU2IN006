@@ -9,7 +9,7 @@
  * @brief Use sha256sum to hash source and save to dest;
  * @return int; -1 if failed
  */
-int hashFile(char* source, char* dest) {
+int hashFile(const char* source, const char* dest) {
   char cmd[MAXL] = "sha256sum ";
   append(cmd, source);
   append(cmd, " | awk '{printf \"%s\",$1}' > ");
@@ -24,22 +24,15 @@ int hashFile(char* source, char* dest) {
 /**
  * @brief Return the sha256sum result of file
  */
-char* sha256file(char* file) {
-  char* fname = createTemp();
-  hashFile(file, fname);
-
-  FILE* f = fopen(fname, "r");
-  char buf[MAXL];
-  fgets(buf, MAXL, f);
-  char* res = strdup(buf);
-
-  if(fclose(f)) err("File closing error\n");
-  if(remove(fname)) err("File removing error\n");
-  free(fname);
-  return res;
+char* sha256file(const char* file) {
+  char* tmp = createTemp();
+  hashFile(file, tmp);
+  char* s = fts(tmp);
+  free(tmp);
+  return s;
 }
 
-char* sha256string(char* s) {
+char* sha256string(const char* s) {
   char* fname = createTemp();
   s2f(s, fname);
   char* res = sha256file(fname);

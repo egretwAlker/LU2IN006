@@ -30,9 +30,9 @@ WorkFile* createWorkFile2(char* name, char* hash, int mode) {
  * @return char* 
  */
 char* wfts(WorkFile* wf) {
-    assert(wf->name != NULL); assert(wf->hash != NULL);
+    assert(wf->name != NULL);
     char buf[MAXL];
-    sprintf(buf,"%s\t%s\t%d", wf->name, wf->hash, wf->mode);
+    sprintf(buf,"%s\t%s\t%d", wf->name, wf->hash?wf->hash:"NULL", wf->mode);
     return strdup(buf);
 }
 
@@ -80,7 +80,7 @@ int appendWorkTree(WorkTree* wt, char* name, char* hash, int mode) {
 }
 
 char* wtts(WorkTree* wt) {
-    char buf[MAXL];
+    char buf[MAXL]; buf[0] = 0;
     char* p = buf;
     for(int i=0; i<wt->n; ++i) {
         char *s = wfts(&(wt->tab[i]));
@@ -105,23 +105,17 @@ WorkTree* stwt(const char* s) {
 }
 
 int wttf(WorkTree* wt, char* file) {
-    FILE* f = fopen(file, "w");
-    assert(f);
     char* s = wtts(wt);
-    fprintf(f, "%s", s);
+    stf(s, file);
     free(s);
-    fclose(f);
     return 0;
 }
 
 WorkTree* ftwt(const char* file) {
-    FILE* f = fopen(file, "r");
-    assert(f);
-    char buf[MAXL];
-    int m = (int)fread(buf, MAXL-1, sizeof(char), f);
-    buf[m] = 0;
-    fclose(f);
-    return stwt(buf);
+    char* s = fts(file);
+    WorkTree* wt = stwt(s);
+    free(s);
+    return wt;
 }
 
 void freeWt(WorkTree* wt) {
@@ -165,6 +159,15 @@ char* concatPaths(char* p1, char* p2) {
 }
 
 /**
+ * @brief This is an adhoc fonction to saveWorkTree, hash pointer points to the new hash
+ */
+void updateWf(WorkFile* wf, char* hash, int mode) {
+    free(wf->hash);
+    wf->hash = hash;
+    wf->mode = mode;
+}
+
+/**
  * @brief Create a snapshot of the files and folders of wt at path
  * and fill in the hash and mode entry
  */
@@ -173,13 +176,11 @@ char* saveWorkTree(WorkTree* wt, char* path) {
         char* fp = concatPaths(path, wt->tab[i].name);
         if(isDir(fp)) {
             WorkTree* newWt = getWtFromPath(fp);
-            wt->tab[i].hash = saveWorkTree(newWt, fp);
-            wt->tab[i].mode = getChmod(fp);
+            updateWf(wt->tab + i, saveWorkTree(newWt, fp), getChmod(fp));
             freeWt(newWt);
         } else {
             blobFile(fp);
-            wt->tab[i].hash = sha256file(fp);
-            wt->tab[i].mode = getChmod(fp);
+            updateWf(wt->tab+i, sha256file(fp), getChmod(fp));
         }
         free(fp);
     }

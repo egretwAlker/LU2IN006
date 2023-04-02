@@ -2,6 +2,7 @@
 #include "misc.h"
 #include "fsop.h"
 #include "workTree.h"
+#include "hashFunc.h"
 
 /**
  * @brief From http://www.cse.yorku.ca/~oz/hash.html
@@ -106,7 +107,7 @@ void commitSet(Commit* c, char* key, char* value) {
 }
 
 /**
- * @brief Create a Commit object with "tree":hash init
+ * @brief Create a Commit object with "tree":hash in it
  */
 Commit* createCommit(char* hash) {
   Commit* c = initCommit();
@@ -149,6 +150,7 @@ char* cts(Commit* c) {
  */
 Commit* stc(const char* s) {
   char buf1[MAXL], buf2[MAXL];
+  buf1[0] = buf2[0] = 0;
   Commit* c = initCommit();
   while(*s) {
     sscanf(s, "(%[^,],%s", buf1, buf2);
@@ -184,27 +186,29 @@ char* blobCommit(Commit* c) {
 }
 
 void initRefs() {
-  char buff[MAXL];
-  sprintf(buff, "%s/.refs", SPFLDR);
-  if (!file_exists(buff)){
-    sprintf(buff, "mkdir %s/.refs", SPFLDR);
-    system(buff);
-    sprintf(buff, "touch %s/.refs/master", SPFLDR);
-    system(buff);
-    sprintf(buff, "touch %s/.refs/HEAD", SPFLDR);
-    system(buff);
+  char buf[MAXL];
+  if (!file_exists(REF)) {
+    sprintf(buf, "mkdir -p %s", REF);
+    system(buf);
+    sprintf(buf, "touch %s/master", REF);
+    system(buf);
+    sprintf(buf, "touch %s/HEAD", REF);
+    system(buf);
   }
 }
 
+/**
+ * @brief Replace the content of ref_name by hash, create the ref file if non existing
+ */
 void createUpdateRef(char* ref_name, char* hash) {
   char buff[MAXL];
-  sprintf(buff, "echo %s > %s/.refs/%s", hash, SPFLDR, ref_name);
-  system(buff);
+  sprintf(buff, "%s/%s", REF, ref_name);
+  stf(hash, buff);
 }
 
 void deleteRef(char* ref_name) {
   char buff[MAXL];
-  sprintf(buff, "%s/.refs/%s", SPFLDR, ref_name);
+  sprintf(buff, "%s/%s", REF, ref_name);
   if (!file_exists(buff)){
     err("The reference %s does not exist\n", ref_name);
   } else {
@@ -216,78 +220,79 @@ void deleteRef(char* ref_name) {
  * @brief
  * @return Content of ref_name, NULL if non existing; "" if empty
  */
-char *getRef(char* ref_name) {
-  FILE *fp;
-  char *result = (char*)malloc(sizeof(char)*MAXL);
-  char buff[MAXL];
-  sprintf(buff, "%s/.refs/%s",SPFLDR, ref_name );
-  if (!file_exists(buff)){
+char* getRef(char* ref_name) {
+  char buf[MAXL];
+  sprintf(buf, "%s/%s", REF, ref_name);
+  if (!file_exists(buf)){
     err("The reference %s does not exist\n", ref_name);
+    return NULL;
   }
-  fp = fopen(buff, "r");
-  assert(fp);
-  fread(result, sizeof(char),MAXL, fp);
-  fclose(fp);
-  return result;
+  return fts(buf);
 }
 
-void createFile(char* file){
-  char buff[MAXL];
-  sprintf(buff, "touch %s", file);
-  system(buff);
-}
-
-void myGitAdd(char* file_or_folder){
+/**
+ * @brief Append fn to workTree represented by .add file
+ * 
+ * @param fn path to of a file or a folder
+ */
+void myGitAdd(char* fn) {
+  if(file_exists(fn) == 0) {
+    err("File does not exist\n");
+    return;
+  }
   WorkTree* wt;
-  char buff[MAXL];
-  sprintf(buff, "%s/.add", SPFLDR);
-  if (!file_exists(buff)){
-    createFile(buff);
+  if (!file_exists(ADD)) {
+    createFile(ADD);
     wt = initWorkTree();
   } else {
-    wt = ftwt(buff);
+    wt = ftwt(ADD);
   }
-  assert(file_exists(file_or_folder));
-  appendWorkTree(wt, file_or_folder, NULL, 0);
-  wttf(wt, buff);
+  if(isDir(fn)) {
+    appendWorkTree(wt, fn, "FOLDER", getChmod(fn));
+  } else {
+    char* s = sha256file(fn);
+    appendWorkTree(wt, fn, s, getChmod(fn));
+    free(s);
+  }
+  wttf(wt, ADD);
   freeWt(wt);
 }
 
-void myGitCommit(char* branch_name, char* message){
-  char buff[MAXL];
-  sprintf(buff, "%s/.refs", SPFLDR);
-  if(!file_exists(buff)){
+void myGitCommit(char* branch_name, char* message) {
+  if(!file_exists(REF)) {
     err("Il faut d'abord initialiser les references du projets\n");
     return;
   }
-  char buff2[MAXL];
-  sprintf(buff2, "%s/.refs/%s", SPFLDR, branch_name);
-  if(!file_exists(buff2)){
+  if(!file_exists(ADD)) {
+    err("Rien à ajouter\n");
+    return;
+  }
+  char buf[MAXL];
+  sprintf(buf, "%s/%s", REF, branch_name);
+  if(!file_exists(buf)){
     err("La branche n'existe pas\n");
     return;
   }
+
   char* last_hash = getRef(branch_name);
   char* head_hash = getRef("HEAD");
-  if(strcmp(last_hash, head_hash)!=0){
-    err("HEAD doit pointer sur le dernier commit de la branche");
-    return;
-  }
-  char buff3[MAXL];
-  sprintf(buff3, "%s/.add", SPFLDR);
-  WorkTree* wt = ftwt(buff3);
-  char buff4[MAXL];
-  sprintf(buff4, "%s/.", SPFLDR);
-  char *hashwt = saveWorkTree(wt, buff4);
-  Commit* c = createCommit(hashwt);
-  if(strlen(last_hash)!=0){
-    commitSet(c, "predecessor", last_hash);
-  } 
-  if(message != NULL){
-    commitSet(c, "message", message);
-  }
-  char* hashc = blobCommit(c);
-  createUpdateRef(branch_name, hashc);
-  createUpdateRef("HEAD", hashc);
-  assert(!remove(buff3));
-  free(wt);
+  if(strcmp(last_hash, head_hash) == 0) {
+    WorkTree* wt = ftwt(ADD);
+    char* hashwt = saveWorkTree(wt, ".");
+    Commit* c = createCommit(hashwt);
+    if(strlen(last_hash) != 0)
+      commitSet(c, "predecessor", last_hash);
+    if(message != NULL)
+      commitSet(c, "message", message);
+    char* hashc = blobCommit(c);
+    createUpdateRef(branch_name, hashc);
+    createUpdateRef("HEAD", hashc);
+    assert(remove(ADD) == 0);
+    freeWt(wt);
+    free(hashwt);
+    free(hashc);
+    freeCommit(c);
+  } else err("HEAD doit pointer sur le dernier commit de la branche");
+  free(last_hash);
+  free(head_hash);
 }

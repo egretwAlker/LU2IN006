@@ -12,7 +12,7 @@
  * @param root_dir 
  * @return List* 
  */
-List* listdir(char* root_dir) {
+List* listdir(const char* root_dir) {
   List* res = initList();
   DIR* dp = opendir(root_dir);
   struct dirent *ep;
@@ -33,12 +33,12 @@ List* listdir(char* root_dir) {
  * @param file 
  * @return int 1 if file (can be a folder) exists at the depth 1
  */
-int file_exists(char* file) {
+int file_exists(const char* file) {
   struct stat buffer;
   return (stat(file, &buffer) == 0);
 }
 
-void cp(char* dest, char* src) {
+void cp(const char* dest, const char* src) {
   FILE *d = fopen(dest, "w"), *s = fopen(src, "r");
   // err("dest: %s, src: %s\n", dest, src);
   assert(d); assert(s);
@@ -55,7 +55,7 @@ void cp(char* dest, char* src) {
  * @param hash 
  * @return char* 
  */
-char* hashToPath(char* hash) {
+char* hashToPath(const char* hash) {
   int len = (int)strlen(hash);
   if(len < 3) {
     err("Hash too short error");
@@ -71,7 +71,7 @@ char* hashToPath(char* hash) {
   return s;
 }
 
-char* hashToPathExt(char* hash, char* ext) {
+char* hashToPathExt(const char* hash, const char* ext) {
   char* s = hashToPath(hash);
   char* res = newconcat(s, ext);
   free(s);
@@ -81,7 +81,7 @@ char* hashToPathExt(char* hash, char* ext) {
 /**
  * @brief Save the snapshot of file
  */
-void blobFile(char* file) {
+void blobFile(const char* file) {
   char*s = blobFileExt(file, "");
   free(s);
 }
@@ -90,7 +90,7 @@ void blobFile(char* file) {
  * @brief Save the snapshot of file with extension ext like ".t" ".c" or ""
  * @return Return the sha256 hash
  */
-char* blobFileExt(char* file, char* ext) {
+char* blobFileExt(const char* file, const char* ext) {
   char* hash = sha256file(file);
   char* path = hashToPath(hash);
   path[SPL+3] = 0;
@@ -108,7 +108,7 @@ char* blobFileExt(char* file, char* ext) {
 /**
  * @brief Save the snapshop of string s and return the sha256 hash of it
  */
-char* blobStringExt(char* s, char* ext) {
+char* blobStringExt(const char* s, const char* ext) {
   char* fname = createTemp();
   s2f(s, fname);
   char* hash = blobFileExt(fname, ext);
@@ -130,11 +130,11 @@ char* createTemp() {
   return fname;
 }
 
-void setMode(int mode, char * path) {
-    char buff[MAXL];
+void setMode(int mode, const char * path) {
+    char buf[MAXL];
     // err("!!mode: %d %o\n", mode, mode);
-    sprintf(buff, "chmod %o %s", mode, path);
-    system(buff);
+    sprintf(buf, "chmod %o %s", mode, path);
+    system(buf);
 }
 
 int getChmod(const char * path) {
@@ -158,4 +158,26 @@ int isDir(const char * path) {
     }
 
     return (ret.st_mode & S_IFDIR) != 0;
+}
+
+char* fts(const char* fn) {
+  char buf[MAXL];
+  FILE* f = fopen(fn, "r");
+  assert(f);
+  int n = (int)fread(buf, sizeof(char), MAXL, f);
+  fclose(f);
+  return strndup(buf, (szt)n);
+}
+
+void stf(const char* s, const char* fn) {
+  FILE* f = fopen(fn, "w");
+  assert(f);
+  fprintf(f, "%s", s);
+  fclose(f);
+}
+
+void createFile(const char* file) {
+  char buf[MAXL];
+  sprintf(buf, "touch %s", file);
+  system(buf);
 }

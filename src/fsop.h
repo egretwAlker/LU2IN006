@@ -2,16 +2,19 @@
 #define DIROP
 #include "cellList.h"
 // We handle only text based files
-List* listdir(char* root_dir);
-int file_exists(char* file);
-void cp(char* dest, char* src);
-char* hashToPath(char* hash);
-char* hashToPathExt(char* hash, char* ext);
-void blobFile(char* file);
-char* blobFileExt(char* file, char* ext);
-char* blobStringExt(char* file, char* ext);
+List* listdir(const char* root_dir);
+int file_exists(const char* file);
+void cp(const char* dest, const char* src);
+char* hashToPath(const char* hash);
+char* hashToPathExt(const char* hash, const char* ext);
+void blobFile(const char* file);
+char* blobFileExt(const char* file, const char* ext);
+char* blobStringExt(const char* file, const char* ext);
 char* createTemp();
 int getChmod(const char* path);
-void setMode(int mode, char * path);
+void setMode(int mode, const char * path);
 int isDir(const char * path);
+char* fts(const char* fn);
+void stf(const char* s, const char* fn);
+void createFile(const char* file);
 #endif
