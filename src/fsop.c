@@ -40,7 +40,6 @@ int file_exists(const char* file) {
 
 void cp(const char* dest, const char* src) {
   FILE *d = fopen(dest, "w"), *s = fopen(src, "r");
-  // err("dest: %s, src: %s\n", dest, src);
   assert(d); assert(s);
   char buf[MAXL];
   int n = (int)fread(buf, sizeof(char), MAXL, s);
@@ -132,7 +131,6 @@ char* createTemp() {
 
 void setMode(int mode, const char * path) {
     char buf[MAXL];
-    // err("!!mode: %d %o\n", mode, mode);
     sprintf(buf, "chmod %o %s", mode, path);
     system(buf);
 }
@@ -141,7 +139,6 @@ int getChmod(const char * path) {
     struct stat ret;
     assert(stat(path, &ret) != -1);
 
-    // Copied from the poly, but Wouldn't that be ret.st_mode & (...|...)
     return ( ret.st_mode & S_IRUSR ) | ( ret.st_mode & S_IWUSR ) | ( ret.st_mode & S_IXUSR ) |
     /*owner*/
     ( ret.st_mode & S_IRGRP ) | ( ret.st_mode & S_IWGRP ) | ( ret.st_mode & S_IXGRP ) |
@@ -152,14 +149,13 @@ int getChmod(const char * path) {
 
 int isDir(const char * path) {
     struct stat ret;
-
-    if(stat(path, &ret) == -1) {
-        return -1;
-    }
-
+    if(stat(path, &ret) == -1) return -1;
     return (ret.st_mode & S_IFDIR) != 0;
 }
 
+/**
+ * @brief File to string
+ */
 char* fts(const char* fn) {
   char buf[MAXL];
   FILE* f = fopen(fn, "r");
@@ -169,6 +165,9 @@ char* fts(const char* fn) {
   return strndup(buf, (szt)n);
 }
 
+/**
+ * @brief String to file
+ */
 void stf(const char* s, const char* fn) {
   FILE* f = fopen(fn, "w");
   assert(f);

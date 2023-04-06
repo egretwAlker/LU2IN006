@@ -117,7 +117,7 @@ Commit* createCommit(const char* hash) {
  * 
  * @return char* NULL if the key is not present, not giving the ownership
  */
-char* commitGet(Commit* c, const char* key) {
+const char* commitGet(Commit* c, const char* key) {
   assert(c != NULL); assert(key != NULL);
   kvp* k = getKvpByKey(c, key);
   return k->value;
@@ -158,12 +158,18 @@ Commit* stc(const char* s) {
   return c;
 }
 
+/**
+ * @brief Commit to file
+ */
 void ctf(Commit* c, const char* file) {
   char* s = cts(c);
   s2f(s, file);
   free(s);
 }
 
+/**
+ * @brief File to commit
+ */
 Commit* ftc(const char* file) {
   char* s = f2s(file);
   Commit* c = stc(s);
@@ -171,6 +177,9 @@ Commit* ftc(const char* file) {
   return c;
 }
 
+/**
+ * @brief Hash to commit
+ */
 Commit* htc(const char* hash) {
   assert(hashValid(hash));
   char* s = hashToPathExt(hash, ".c");
@@ -190,6 +199,9 @@ char* blobCommit(Commit* c) {
   return hash;
 }
 
+/**
+ * @brief Initialise the folder as a repository with branch master
+ */
 void initRefs() {
   char buf[MAXL];
   if (!file_exists(REF)) {
@@ -253,53 +265,14 @@ void myGitAdd(const char* fn) {
     wt = ftwt(ADD);
   }
   if(isDir(fn)) {
-    appendWorkTree(wt, fn, "FOLDER", getChmod(fn));
+    appendWorkTree(wt, fn, "FOLDER", -1);
   } else {
     char* s = sha256file(fn);
-    appendWorkTree(wt, fn, s, getChmod(fn));
+    appendWorkTree(wt, fn, "FILE", -1);
     free(s);
   }
   wttf(wt, ADD);
   freeWt(wt);
-}
-
-void myGitCommit(const char* branch_name, const char* message) {
-  if(!file_exists(REF)) {
-    err("Il faut d'abord initialiser les references du projets\n");
-    return;
-  }
-  if(!file_exists(ADD)) {
-    err("Rien à ajouter\n");
-    return;
-  }
-  char buf[MAXL];
-  sprintf(buf, "%s/%s", REF, branch_name);
-  if(!file_exists(buf)){
-    err("La branche n'existe pas\n");
-    return;
-  }
-
-  char* last_hash = getRef(branch_name);
-  char* head_hash = getRef("HEAD");
-  if(strcmp(last_hash, head_hash) == 0) {
-    WorkTree* wt = ftwt(ADD);
-    char* hashwt = saveWorkTree(wt, ".");
-    Commit* c = createCommit(hashwt);
-    if(strlen(last_hash) != 0)
-      commitSet(c, "predecessor", last_hash);
-    if(message != NULL)
-      commitSet(c, "message", message);
-    char* hashc = blobCommit(c);
-    createUpdateRef(branch_name, hashc);
-    createUpdateRef("HEAD", hashc);
-    assert(remove(ADD) == 0);
-    freeWt(wt);
-    free(hashwt);
-    free(hashc);
-    freeCommit(c);
-  } else err("HEAD doit pointer sur le dernier commit de la branche");
-  free(last_hash);
-  free(head_hash);
 }
 
 void initBranch() {
@@ -308,6 +281,7 @@ void initBranch() {
 
 int branchExists(const char* branch) {
   List* refs = listdir(REF);
+  if(strcmp(branch, "HEAD") == 0) return 0;
   int res = (searchList(refs, branch) != NULL);
   freeList(refs);
   return res;
@@ -326,6 +300,9 @@ char* getCurrentBranch() {
   return fts(CURB);
 }
 
+/**
+ * @brief Print the hash [and the message] of all the commits preceding (included) where the branch points
+ */
 void printBranch(const char* branch) {
   char* h = getRef(branch);
   while(hashValid(h)) {
@@ -341,6 +318,9 @@ void printBranch(const char* branch) {
   free(h);
 }
 
+/**
+ * @return The hashes of all the commits preceding (included) where the branch points
+ */
 List* branchList(const char* branch) {
   List* l = initList();
   char* h = getRef(branch);
@@ -355,6 +335,10 @@ List* branchList(const char* branch) {
   return l;
 }
 
+/**
+ * @brief
+ * @return The Hashes of all the commits (of all branches)
+ */
 List* getAllCommits() {
   List* l = initList();
   List* branches = listdir(REF);
@@ -367,7 +351,7 @@ List* getAllCommits() {
 
 void restoreCommit(const char* hash_commit) {
   Commit* c = htc(hash_commit);
-  char* hash_tree = commitGet(c, "tree");
+  const char* hash_tree = commitGet(c, "tree");
   WorkTree* wt = htwt(hash_tree);
   restoreWorkTree(wt, ".");
   freeWt(wt);
@@ -376,6 +360,7 @@ void restoreCommit(const char* hash_commit) {
 
 // Does restoreCommit need to delete old files?
 void myGitCheckoutBranch(const char* branch) {
+  assert(branchExists(branch));
   stf(branch, CURB);
   char* h = getRef(branch);
   createUpdateRef("HEAD", h);
@@ -386,8 +371,6 @@ void myGitCheckoutBranch(const char* branch) {
 
 /**
  * @brief Show information about commits whose hashes start by pattern
- * 
- * @param pattern 
  */
 void myGitCheckoutCommit(const char* pattern) {
   List* l = getAllCommits();

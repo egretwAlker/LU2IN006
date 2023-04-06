@@ -22,7 +22,7 @@ char* kvts(const kvp* k);
 kvp* stkv(const char* s);
 Commit* stc(const char* s);
 char* cts(Commit* c);
-char* commitGet(Commit* c, const char* key);
+const char* commitGet(Commit* c, const char* key);
 Commit* createCommit(const char* hash);
 kvp* getKvpByKey(Commit* c, const char* key);
 Commit* initCommit();

@@ -42,6 +42,9 @@ WorkFile* stwf(const char* ch) {
     return createWorkFile2(buf1, buf2, buf3);
 }
 
+/**
+ * @brief Hash to WorkTree
+ */
 WorkTree* htwt(const char* hash) {
     assert(hashValid(hash));
     char* fn = hashToPathExt(hash, ".t");
@@ -53,7 +56,7 @@ WorkTree* htwt(const char* hash) {
 }
 
 void freeWf(WorkFile* wf) {
-    free(wf->name); // free(NULL), nothing happens
+    free(wf->name);
     free(wf->hash);
     free(wf);
 }

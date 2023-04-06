@@ -32,6 +32,48 @@ void list_add() {
     }
 }
 
+/**
+ * @brief If HEAD and branch point to the same thing, then move HEAD and branch towards together
+ */
+void myGitCommit(const char* branch, const char* message) {
+  if(!file_exists(REF)) {
+    err("Il faut d'abord initialiser les references du projets\n");
+    return;
+  }
+  if(!file_exists(ADD)) {
+    err("Rien à ajouter\n");
+    return;
+  }
+  if(!branchExists(branch)) {
+    err("La branche n'existe pas\n");
+    return;
+  }
+
+  char* last_hash = getRef(branch);
+  char* head_hash = getRef("HEAD");
+  assert(last_hash);
+  assert(head_hash);
+  if(strcmp(last_hash, head_hash) == 0) {
+    WorkTree* wt = ftwt(ADD);
+    char* hashwt = saveWorkTree(wt, ".");
+    Commit* c = createCommit(hashwt);
+    if(strlen(last_hash) != 0)
+      commitSet(c, "predecessor", last_hash);
+    if(message != NULL)
+      commitSet(c, "message", message);
+    char* hashc = blobCommit(c);
+    createUpdateRef(branch, hashc);
+    createUpdateRef("HEAD", hashc);
+    assert(remove(ADD) == 0);
+    freeWt(wt);
+    free(hashwt);
+    free(hashc);
+    freeCommit(c);
+  } else err("HEAD doit pointer sur le dernier commit de la branche");
+  free(last_hash);
+  free(head_hash);
+}
+
 void help() {
     printf("myGit init\n");
     printf("myGit list-refs\n");
@@ -74,8 +116,10 @@ int main(int argc, char* argv[]){
         assert(file_exists(ADD) == 0);
     }
     if(strcmp(argv[1], "list-add") == 0) list_add();
-    if(strcmp(argv[1], "commit")==0)
-        myGitCommit(argv[2], argc == 5 && strcmp(argv[3], "-m")==0 ? argv[4] : NULL);
+    if(strcmp(argv[1], "commit")==0) {
+        assert(argc == 3 || (argc == 5 && strcmp(argv[3], "-m")));
+        myGitCommit(argv[2], argc == 5 ? argv[4] : NULL);
+    }
     if(strcmp(argv[1], "get-current-branch")==0) {
         assert(argc == 2);
         char* s = getCurrentBranch();
