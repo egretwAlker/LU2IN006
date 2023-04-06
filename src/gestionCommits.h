@@ -1,5 +1,6 @@
 #ifndef GESTIONCOMMITS
 #define GESTIONCOMMITS
+#include "cellList.h"
 // reference files can be non existing, empty (point to none), or non empty
 // key, value are never NULL
 typedef struct {
@@ -35,4 +36,12 @@ void deleteRef(const char * ref_name);
 char* getRef(const char* ref_name);
 void myGitAdd(const char* file_or_folder);
 void myGitCommit(const char* branch_name, const char* message);
+char* getCurrentBranch();
+int branchExists(const char* branch);
+void createBranch(const char* branch);
+List* branchList(const char* branch);
+void myGitCheckoutBranch(const char* branch);
+void myGitCheckoutCommit(const char* pattern);
+void printBranch(const char* branch);
+void initBranch();
 #endif

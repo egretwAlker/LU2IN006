@@ -34,11 +34,8 @@ void freeKeyVal(kvp* kv) {
 
 void freeCommit(Commit* c) {
   for(int i=0;i<COMMITN;++i) {
-    if(c->T[i] != NULL) {
-      free(c->T[i]->key);
-      free(c->T[i]->value);
-      free(c->T[i]);
-    }
+    if(c->T[i] != NULL)
+      freeKeyVal(c->T[i]);
   }
   free(c->T);
   free(c);
@@ -176,7 +173,10 @@ Commit* ftc(const char* file) {
 
 Commit* htc(const char* hash) {
   assert(hashValid(hash));
-  return ftc(hashToPathExt(hash, ".c"));
+  char* s = hashToPathExt(hash, ".c");
+  Commit* res = ftc(s);
+  free(s);
+  return res;
 }
 
 /**
@@ -316,6 +316,9 @@ int branchExists(const char* branch) {
 }
 
 // untested
+/**
+ * @brief Create a branch pointing to where the HEAD points
+ */
 void createBranch(const char* branch) {
   char* hash = getRef("HEAD");
   createUpdateRef(branch, hash);
@@ -337,8 +340,8 @@ void printBranch(const char* branch) {
     else
       printf("%s\n", h);
     free(h);
-    h = commitGet(c, "predecessor");
-    free(c);
+    h = strdup(commitGet(c, "predecessor"));
+    freeCommit(c);
   }
   free(h);
 }
@@ -351,8 +354,8 @@ List* branchList(const char* branch) {
     Commit* c = htc(h);
     insertFirst(l, buildCell(h));
     free(h);
-    h = commitGet(c, "predecessor");
-    free(c);
+    h = strdup(commitGet(c, "predecessor"));
+    freeCommit(c);
   }
   free(h);
   return l;
@@ -376,16 +379,16 @@ void restoreCommit(const char* hash_commit) {
   WorkTree* wt = htwt(hash_tree);
   restoreWorkTree(wt, ".");
   freeWt(wt);
-  free(hash_tree);
   freeCommit(c);
 }
 
-// untested
+// untested, does restoreCommit need to delete old files
 void myGitCheckoutBranch(const char* branch) {
   stf(branch, CURB);
   char* h = getRef(branch);
   createUpdateRef("HEAD", h);
-  restoreCommit(h);
+  // err("h : %s\n", h);
+  if(hashValid(h)) restoreCommit(h);
   free(h);
 }
 
@@ -401,13 +404,15 @@ void myGitCheckoutCommit(const char* pattern) {
   int sz = listSize(filtered);
   if(sz == 0) {
     printf("Pattern not matched\n");
-  } else {
-    if(sz > 1) {
-      printf("Multiple matching found:\n");
-      for(Cell* c = *filtered; c; c=c->next) {
-        printf("-> %s\n", c->data);
-      }
+  } else if(sz > 1) {
+    printf("Multiple matching found:\n");
+    for(Cell* c = *filtered; c; c=c->next) {
+      printf("-> %s\n", c->data);
     }
+  } else if(sz == 1) {
+    char* h = (*l)->data;
+    createUpdateRef("HEAD", h);
+    restoreCommit(h);
   }
   freeList(l);
   freeList(filtered);

@@ -135,6 +135,6 @@ void test15() {
 }
 
 int main(void) {
-  test15();
+  test12();
   return 0;
 }

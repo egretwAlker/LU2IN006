@@ -44,9 +44,11 @@ WorkFile* stwf(const char* ch) {
 
 WorkTree* htwt(const char* hash) {
     assert(hashValid(hash));
-    char* s = hashToPathExt(hash, ".t");
+    char* fn = hashToPathExt(hash, ".t");
+    char* s = fts(fn);
     WorkTree* res = stwt(s);
     free(s);
+    free(fn);
     return res;
 }
 

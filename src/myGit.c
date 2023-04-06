@@ -1,6 +1,7 @@
 #include "cellList.h"
 #include "fsop.h"
 #include "misc.h"
+#include "cellList.h"
 #include "hashFunc.h"
 #include "workTree.h"
 #include "gestionCommits.h"
@@ -40,6 +41,11 @@ void help() {
     printf("myGit list-add\n");
     printf("myGit clear-add\n");
     printf("myGit commit <branch-name> [-m <message>]\n");
+    printf("myGit get-current-branch\n");
+    printf("myGit branch <branch-name> : créer une branche\n");
+    printf("myGit branch-print <branch-name>\n");
+    printf("myGit checkout-branch <branch-name>\n");
+    printf("myGit checkout-commit <pattern>\n");
 }
 
 int main(int argc, char* argv[]){
@@ -47,7 +53,10 @@ int main(int argc, char* argv[]){
         help();
         return 0;
     }
-    if(strcmp(argv[1], "init")==0) initRefs();
+    if(strcmp(argv[1], "init")==0) {
+        initRefs();
+        initBranch();
+    }
     if(!file_exists(REF)) {
         err("Il faut initialiser d'abord\n");
         return 0;
@@ -67,5 +76,33 @@ int main(int argc, char* argv[]){
     if(strcmp(argv[1], "list-add") == 0) list_add();
     if(strcmp(argv[1], "commit")==0)
         myGitCommit(argv[2], argc == 5 && strcmp(argv[3], "-m")==0 ? argv[4] : NULL);
+    if(strcmp(argv[1], "get-current-branch")==0) {
+        assert(argc == 2);
+        char* s = getCurrentBranch();
+        printf("%s", s);
+        free(s);
+    }
+    if(strcmp(argv[1], "branch")==0) {
+        assert(argc == 3);
+        if(branchExists(argv[2])) {
+            err("La branche existe déjà.\n");
+        } else createBranch(argv[2]);
+    }
+    if(strcmp(argv[1], "branch-print")==0) {
+        assert(argc == 3);
+        if(!branchExists(argv[2])) {
+            err("La branche n'existe pas.\n");
+        } else printBranch(argv[2]);
+    }
+    if(strcmp(argv[1], "checkout-branch")==0) {
+        assert(argc == 3);
+        if(!branchExists(argv[2])) {
+            err("La branche n'existe pas.\n");
+        } else myGitCheckoutBranch(argv[2]);
+    }
+    if(strcmp(argv[1], "checkout-commit")==0) {
+        assert(argc == 3);
+        myGitCheckoutCommit(argv[2]);
+    }
     return 0;
 }
