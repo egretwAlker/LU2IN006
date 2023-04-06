@@ -302,12 +302,10 @@ void myGitCommit(const char* branch_name, const char* message) {
   free(head_hash);
 }
 
-// untested
 void initBranch() {
   stf("master", CURB);
 }
 
-// untested
 int branchExists(const char* branch) {
   List* refs = listdir(REF);
   int res = (searchList(refs, branch) != NULL);
@@ -315,7 +313,6 @@ int branchExists(const char* branch) {
   return res;
 }
 
-// untested
 /**
  * @brief Create a branch pointing to where the HEAD points
  */
@@ -325,12 +322,10 @@ void createBranch(const char* branch) {
   free(hash);
 }
 
-// untested
 char* getCurrentBranch() {
   return fts(CURB);
 }
 
-// untested
 void printBranch(const char* branch) {
   char* h = getRef(branch);
   while(hashValid(h)) {
@@ -346,7 +341,6 @@ void printBranch(const char* branch) {
   free(h);
 }
 
-// untested
 List* branchList(const char* branch) {
   List* l = initList();
   char* h = getRef(branch);
@@ -361,7 +355,6 @@ List* branchList(const char* branch) {
   return l;
 }
 
-// untested
 List* getAllCommits() {
   List* l = initList();
   List* branches = listdir(REF);
@@ -372,7 +365,6 @@ List* getAllCommits() {
   return l;
 }
 
-// untested
 void restoreCommit(const char* hash_commit) {
   Commit* c = htc(hash_commit);
   char* hash_tree = commitGet(c, "tree");
@@ -382,7 +374,7 @@ void restoreCommit(const char* hash_commit) {
   freeCommit(c);
 }
 
-// untested, does restoreCommit need to delete old files
+// Does restoreCommit need to delete old files?
 void myGitCheckoutBranch(const char* branch) {
   stf(branch, CURB);
   char* h = getRef(branch);
@@ -392,7 +384,6 @@ void myGitCheckoutBranch(const char* branch) {
   free(h);
 }
 
-// untested
 /**
  * @brief Show information about commits whose hashes start by pattern
  * 
