@@ -29,6 +29,7 @@ Commit* initCommit();
 void commitSet(Commit* c, const char* key, const char* value);
 void ctf(Commit* c, const char* file);
 Commit* ftc(const char* file);
+Commit* htc(const char* hash);
 char* blobCommit(Commit* c);
 void initRefs();
 void createUpdateRef(const char* ref_name, const char* hash);
