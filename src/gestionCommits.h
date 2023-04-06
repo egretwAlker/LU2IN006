@@ -36,7 +36,6 @@ void createUpdateRef(const char* ref_name, const char* hash);
 void deleteRef(const char * ref_name);
 char* getRef(const char* ref_name);
 void myGitAdd(const char* file_or_folder);
-void myGitCommit(const char* branch_name, const char* message);
 char* getCurrentBranch();
 int branchExists(const char* branch);
 void createBranch(const char* branch);
