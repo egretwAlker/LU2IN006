@@ -55,6 +55,9 @@ List* filterList(const List* l, const char* pattern) {
   return res;
 }
 
+/**
+ * @return How many elements in l
+ */
 int listSize(const List* l) {
   assert(l != NULL);
   int cnt = 0;

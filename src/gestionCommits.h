@@ -40,8 +40,6 @@ char* getCurrentBranch();
 int branchExists(const char* branch);
 void createBranch(const char* branch);
 List* branchList(const char* branch);
-void myGitCheckoutBranch(const char* branch);
-void myGitCheckoutCommit(const char* pattern);
 void printBranch(const char* branch);
 void initBranch();
 #endif

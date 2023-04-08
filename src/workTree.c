@@ -61,6 +61,9 @@ void freeWf(WorkFile* wf) {
     free(wf);
 }
 
+/**
+ * @return An empty WorkTree
+ */
 WorkTree* initWorkTree() {
     WorkTree* wt = (WorkTree*)malloc(sizeof(WorkTree));
     wt->size = WTS;
@@ -162,15 +165,6 @@ WorkTree* getWtFromPath(const char* path) {
     return newWt;
 }
 
-char* concatPaths(const char* p1, const char* p2) {
-    int n = (int)strlen(p1)+(int)strlen(p2)+2;
-    char* s = malloc(sizeof(char)*(szt)n);
-    strcpy(s, p1);
-    append(s, "/");
-    append(s, p2);
-    return s;
-}
-
 /**
  * @brief This is an adhoc fonction to saveWorkTree, hash pointer points to the new hash, take the ownership of hash
  */
@@ -207,6 +201,9 @@ int isWorkTree(const char* hash) {
     return res;
 }
 
+/**
+ * @brief Put all the files in WorkTree to path
+ */
 void restoreWorkTree(WorkTree* wt, const char* path) {
     char* cmd = newconcat("mkdir -p ", path);
     assert(system(cmd) == 0);
@@ -229,4 +226,26 @@ void restoreWorkTree(WorkTree* wt, const char* path) {
         free(fp);
         free(hp);
     }
+}
+
+/**
+ * @brief conflicts, who should be pointing to NULL when given, will point to a List of the intersection of wt1 and wt2:w
+ * @return A WorkTree with the symmetric difference of wt1 and wt2
+ */
+WorkTree* mergeWorkTrees(WorkTree* wt1, WorkTree* wt2, List** conflicts) {
+    WorkTree* wt = initWorkTree();
+    conflicts = initList();
+    for(int i=0; i<wt1->n; ++i) {
+        if(!inWorkTree(wt2, wt1->tab[i].name)) {
+            appendWorkTree(wt, wt1->tab[i].name, wt1->tab[i].hash, wt1->tab[i].mode);
+        }
+    }
+    for(int i=0; i<wt2->n; ++i) {
+        if(!inWorkTree(wt1, wt2->tab[i].name)) {
+            appendWorkTree(wt, wt2->tab[i].name, wt2->tab[i].hash, wt2->tab[i].mode);
+        } else {
+            insertFirstString(*conflicts, wt2->tab[i].name);
+        }
+    }
+    return wt;
 }

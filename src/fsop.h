@@ -17,4 +17,5 @@ int isDir(const char * path);
 char* fts(const char* fn);
 void stf(const char* s, const char* fn);
 void createFile(const char* file);
+char* concatPaths(const char* p1, const char* p2);
 #endif

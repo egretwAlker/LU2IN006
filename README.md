@@ -10,8 +10,8 @@ todolist:
 - Replace things by fts, stf
 
 problems:
-- We don't really check, when adding, if something is already added (like if there is f as folder already, then we may add f/a)
 - When do commit, we commit the current version of the file instead of the version when added; however, when doing list-add, we show the version when added
+- Git add can't handle deletion of files
 
 ## Mode d'utilisation
 

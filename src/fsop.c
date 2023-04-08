@@ -70,6 +70,18 @@ char* hashToPath(const char* hash) {
   return s;
 }
 
+/**
+ * @return p1/p2
+ */
+char* concatPaths(const char* p1, const char* p2) {
+    int n = (int)strlen(p1)+(int)strlen(p2)+2;
+    char* s = malloc(sizeof(char)*(szt)n);
+    strcpy(s, p1);
+    append(s, "/");
+    append(s, p2);
+    return s;
+}
+
 char* hashToPathExt(const char* hash, const char* ext) {
   char* s = hashToPath(hash);
   char* res = newconcat(s, ext);

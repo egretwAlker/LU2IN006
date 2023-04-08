@@ -226,11 +226,8 @@ void createUpdateRef(const char* ref_name, const char* hash) {
 void deleteRef(const char* ref_name) {
   char buff[MAXL];
   sprintf(buff, "%s/%s", REF, ref_name);
-  if (!file_exists(buff)){
-    err("The reference %s does not exist\n", ref_name);
-  } else {
-    assert(remove(buff) == 0);
-  }
+  assert(file_exists(buff));
+  assert(remove(buff) == 0);
 }
 
 /**
@@ -240,10 +237,7 @@ void deleteRef(const char* ref_name) {
 char* getRef(const char* ref_name) {
   char buf[MAXL];
   sprintf(buf, "%s/%s", REF, ref_name);
-  if (!file_exists(buf)){
-    err("The reference %s does not exist\n", ref_name);
-    return NULL;
-  }
+  assert(file_exists(buf));
   return fts(buf);
 }
 
@@ -264,12 +258,12 @@ void myGitAdd(const char* fn) {
   } else {
     wt = ftwt(ADD);
   }
-  if(isDir(fn)) {
-    appendWorkTree(wt, fn, "FOLDER", -1);
-  } else {
-    char* s = sha256file(fn);
-    appendWorkTree(wt, fn, "FILE", -1);
-    free(s);
+  if(!inWorkTree(wt, fn)) {
+    if(isDir(fn)) {
+      appendWorkTree(wt, fn, "FOLDER", -1);
+    } else {
+      appendWorkTree(wt, fn, "FILE", -1);
+    }
   }
   wttf(wt, ADD);
   freeWt(wt);
@@ -349,45 +343,39 @@ List* getAllCommits() {
   return l;
 }
 
+/**
+ * @brief Commit to WorkTree
+ */
+WorkTree* ctwt(const Commit* c) {
+  const char* hash_tree = commitGet(c, "tree");
+  return htwt(hash_tree);
+}
+
+/**
+ * @brief Restore the WorkTree associated
+ */
 void restoreCommit(const char* hash_commit) {
   Commit* c = htc(hash_commit);
-  const char* hash_tree = commitGet(c, "tree");
-  WorkTree* wt = htwt(hash_tree);
+  WorkTree* wt = ctwt(c);
   restoreWorkTree(wt, ".");
   freeWt(wt);
   freeCommit(c);
 }
 
-// Does restoreCommit need to delete old files?
-void myGitCheckoutBranch(const char* branch) {
-  assert(branchExists(branch));
-  stf(branch, CURB);
-  char* h = getRef(branch);
-  createUpdateRef("HEAD", h);
-  // err("h : %s\n", h);
-  if(hashValid(h)) restoreCommit(h);
-  free(h);
-}
-
 /**
- * @brief Show information about commits whose hashes start by pattern
+ * @brief Branch to WorkTree
  */
-void myGitCheckoutCommit(const char* pattern) {
-  List* l = getAllCommits();
-  List* filtered = filterList(l, pattern);
-  int sz = listSize(filtered);
-  if(sz == 0) {
-    printf("Pattern not matched\n");
-  } else if(sz > 1) {
-    printf("Multiple matching found:\n");
-    for(Cell* c = *filtered; c; c=c->next) {
-      printf("-> %s\n", c->data);
-    }
-  } else if(sz == 1) {
-    char* h = (*l)->data;
-    createUpdateRef("HEAD", h);
-    restoreCommit(h);
+WorkTree* btwt(const char* branch) {
+  char* hash_commit = getRef(branch);
+  assert(hash_commit != NULL);
+  WorkTree* wt;
+  if(strlen(hash_commit) == 0) {
+    wt = initWorkTree();
+  } else {
+    Commit* c = htc(hash_commit);
+    wt = ctwt(c);
+    freeCommit(c);
   }
-  freeList(l);
-  freeList(filtered);
+  free(hash_commit);
+  return wt;
 }

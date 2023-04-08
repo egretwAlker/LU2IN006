@@ -34,4 +34,5 @@ char* blobWorkTree(WorkTree* wt);
 char* saveWorkTree(WorkTree* wt, const char* path);
 WorkTree* getWtFromPath(const char* path);
 void restoreWorkTree(WorkTree* wt, const char* path);
+WorkTree* mergeWorkTrees(WorkTree* wt1, WorkTree* wt2, List** conflicts);
 #endif
