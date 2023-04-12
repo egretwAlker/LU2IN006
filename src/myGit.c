@@ -10,14 +10,11 @@
  * @brief Allow to put other metadata (e.g. second_predecessor) in the commit generated
  */
 void myGitCommit2(const char* branch, const char* message, const char* pred2) {
-  if(!file_exists(ADD)) {
-    err("Rien à ajouter\n");
-    return;
-  }
   if(!branchExists(branch)) {
     err("La branche n'existe pas\n");
     return;
   }
+  if(!file_exists(ADD)) createFile(ADD);
 
   char* last_hash = getRef(branch);
   char* head_hash = getRef("HEAD");
@@ -61,7 +58,6 @@ void myGitCheckoutBranch(const char* branch) {
   stf(branch, CURB);
   char* h = getRef(branch);
   createUpdateRef("HEAD", h);
-  // err("h : %s\n", h);
   if(hashValid(h)) restoreCommit(h);
   free(h);
 }
@@ -130,7 +126,7 @@ void createDeletionCommit(const char* branch, List* conflicts, const char* messa
   myGitCheckoutBranch(branch);
   WorkTree* wt = btwt(branch);
   for(int i=0; i<wt->n; ++i) {
-    if(searchList(conflicts, wt->tab[i].name) != NULL) {
+    if(searchList(conflicts, wt->tab[i].name) == NULL) {
       myGitAdd(wt->tab[i].name);
     }
   }
@@ -155,7 +151,7 @@ void myGitCheckoutCommit(const char* pattern) {
       printf("-> %s\n", c->data);
     }
   } else if(sz == 1) {
-    char* h = (*l)->data;
+    char* h = (*filtered)->data;
     createUpdateRef("HEAD", h);
     restoreCommit(h);
   }
@@ -184,9 +180,9 @@ void commandMerge(const char* remb, const char* meg) {
       scanf("%d", &d);
       assert(1 <= d && d <= 3);
       if(d == 1) {
-        createDeletionCommit(remb, conflicts, meg);
+        createDeletionCommit(remb, conflicts, "Deletion of conflicts");
       } else if(d == 2) {
-        createDeletionCommit(curb, conflicts, meg);
+        createDeletionCommit(curb, conflicts, "Deletion of conflicts");
       } else if(d == 3) {
         err("Veuillez taper les noms des fichiers que vous souhaiter garder dans la branch courante:\n");
         err("Sous forme de string1|string2|...|stringn\n");
@@ -198,11 +194,12 @@ void commandMerge(const char* remb, const char* meg) {
           if(searchList(remains, c->data) == NULL)
             insertFirstString(remainsb, c->data);
         }
-        createDeletionCommit(remb, remainsb, meg);
-        createDeletionCommit(curb, conflicts, meg);
+        createDeletionCommit(remb, remains, "Deletion of conflicts");
+        createDeletionCommit(curb, remainsb, "Deletion of conflicts");
         freeList(remains);
         freeList(remainsb);
       }
+      merge(remb, meg);
     }
     freeList(conflicts);
   }

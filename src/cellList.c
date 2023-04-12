@@ -146,11 +146,13 @@ List* ftol(const char* path) {
 }
 
 void freeCell(Cell* c) {
+  if(c==NULL) return;
   free(c->data);
   free(c);
 }
 
 void freeList(List *l) {
+  if(l==NULL) return;
   for(Cell *c=*l, *p; c; c=p) {
     p=c->next;
     freeCell(c);

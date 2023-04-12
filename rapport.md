@@ -18,3 +18,7 @@ err
 sscanf(s, "(%[^,],%[^)])", buf1, buf2); utilisation de scanf intéressante
 
 ## Structure des fichiers du projet
+
+## Mode d'utilisation
+
+On interdit ) dans la commentaire.

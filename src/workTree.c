@@ -56,6 +56,7 @@ WorkTree* htwt(const char* hash) {
 }
 
 void freeWf(WorkFile* wf) {
+    if(wf == NULL) return;
     free(wf->name);
     free(wf->hash);
     free(wf);
@@ -135,6 +136,7 @@ WorkTree* ftwt(const char* file) {
 }
 
 void freeWt(WorkTree* wt) {
+    if(wt == NULL) return;
     for(int i=0;i<wt->n;++i) {
         free(wt->tab[i].name);
         free(wt->tab[i].hash);
