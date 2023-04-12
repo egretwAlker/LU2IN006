@@ -12,6 +12,7 @@ todolist:
 problems:
 - When do commit, we commit the current version of the file instead of the version when added; however, when doing list-add, we show the version when added
 - Git add can't handle deletion of files
+- Branche? Ref?
 
 ## Mode d'utilisation
 

@@ -1,6 +1,7 @@
 #ifndef GESTIONCOMMITS
 #define GESTIONCOMMITS
 #include "cellList.h"
+#include "workTree.h"
 // reference files can be non existing, empty (point to none), or non empty
 // key, value are never NULL
 typedef struct {
@@ -30,6 +31,7 @@ void commitSet(Commit* c, const char* key, const char* value);
 void ctf(Commit* c, const char* file);
 Commit* ftc(const char* file);
 Commit* htc(const char* hash);
+WorkTree* btwt(const char* branch);
 char* blobCommit(Commit* c);
 void initRefs();
 void createUpdateRef(const char* ref_name, const char* hash);
@@ -37,9 +39,11 @@ void deleteRef(const char * ref_name);
 char* getRef(const char* ref_name);
 void myGitAdd(const char* file_or_folder);
 char* getCurrentBranch();
+List* getAllCommits();
 int branchExists(const char* branch);
 void createBranch(const char* branch);
 List* branchList(const char* branch);
 void printBranch(const char* branch);
 void initBranch();
+void restoreCommit(const char* hash_commit);
 #endif

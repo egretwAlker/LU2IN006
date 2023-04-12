@@ -6,34 +6,8 @@
 #include "workTree.h"
 #include "gestionCommits.h"
 
-void list_refs() {
-  if(!file_exists(REF)) err("References n'existent pas\n");
-  else {
-    printf("REFS : \n");
-    List* l = listdir(REF);
-    for(Cell* ptr = *l; ptr != NULL; ptr = ptr->next) {
-      char* content = getRef(ptr->data);
-      printf("- %s \t %s \n", ptr->data, content);
-      free(content);
-    }
-    freeList(l);
-  }
-}
-
-void list_add() {
-  if(!file_exists(ADD)) err("Zone de preparation est vide\n");
-  else {
-    printf("Zone de preparation : \n");
-    WorkTree* wt = ftwt(ADD);
-    char* s = wtts(wt);
-    printf("%s\n", s);
-    freeWt(wt);
-    free(s);
-  }
-}
-
 /**
- * @brief Allow to put other metadata in the commit generated
+ * @brief Allow to put other metadata (e.g. second_predecessor) in the commit generated
  */
 void myGitCommit2(const char* branch, const char* message, const char* pred2) {
   if(!file_exists(ADD)) {
@@ -62,7 +36,7 @@ void myGitCommit2(const char* branch, const char* message, const char* pred2) {
     char* hashc = blobCommit(c);
     createUpdateRef(branch, hashc);
     createUpdateRef("HEAD", hashc);
-    assert(remove(ADD) == 0);
+    remove(ADD);
     freeWt(wt);
     free(hashwt);
     free(hashc);
@@ -79,21 +53,57 @@ void myGitCommit(const char* branch, const char* message) {
   myGitCommit2(branch, message, NULL);
 }
 
+/**
+ * @brief Move with HEAD to where the branch points
+ */
+void myGitCheckoutBranch(const char* branch) {
+  assert(branchExists(branch));
+  stf(branch, CURB);
+  char* h = getRef(branch);
+  createUpdateRef("HEAD", h);
+  // err("h : %s\n", h);
+  if(hashValid(h)) restoreCommit(h);
+  free(h);
+}
+
+void list_refs() {
+  if(!file_exists(REF)) err("References n'existent pas\n");
+  else {
+    printf("REFS : \n");
+    List* l = listdir(REF);
+    for(Cell* ptr = *l; ptr != NULL; ptr = ptr->next) {
+      char* content = getRef(ptr->data);
+      printf("- %s \t %s \n", ptr->data, content);
+      free(content);
+    }
+    freeList(l);
+  }
+}
+
+void list_add() {
+  if(!file_exists(ADD)) err("Zone de preparation est vide\n");
+  else {
+    printf("Zone de preparation : \n");
+    WorkTree* wt = ftwt(ADD);
+    char* s = wtts(wt);
+    printf("%s\n", s);
+    freeWt(wt);
+    free(s);
+  }
+}
 
 /**
- * @brief This fonctions will discard all the changes after the last commit
+ * @brief If no conflicts, merge remote_branch to current_branch, otherwise no operations;
+ * this fonctions will discard all the changes after the last commit
  * @return NULL if no conflicts, a List of names of conflict files
  */
 List* merge(const char* remote_branch, const char* message) {
-  assert(remove(ADD) == 0);
-  if(!branchExists(remote_branch)) {
-    err("La branche n'existe pas\n");
-    return;
-  }
+  remove(ADD);
+  assert(branchExists(remote_branch));
   char* current_branch = getCurrentBranch();
   WorkTree *wt1 = btwt(current_branch), *wt2 = btwt(remote_branch);
   List* l = NULL;
-  WorkTree* wt = mergeWorkTrees(wt1, wt2, l);
+  WorkTree* wt = mergeWorkTrees(wt1, wt2, &l);
   if(listSize(l) == 0) {
     freeList(l); l = NULL;
     restoreWorkTree(wt, ".");
@@ -104,18 +114,30 @@ List* merge(const char* remote_branch, const char* message) {
     deleteRef(remote_branch);
   }
   free(current_branch);
-  freeWorkTree(wt);
-  freeWorkTree(wt1);
-  freeWorkTree(wt2);
+  freeWt(wt);
+  freeWt(wt1);
+  freeWt(wt2);
   return l;
 }
 
 /**
  * @brief Advance by a commit of deletion of files in conflit on branch with message
  */
-void createDeletionCommit(const char* branch, const List* conflit, const char* message) {
+void createDeletionCommit(const char* branch, List* conflicts, const char* message) {
+  remove(ADD);
+  assert(branchExists(branch));
+  char* curb = getCurrentBranch();
   myGitCheckoutBranch(branch);
   WorkTree* wt = btwt(branch);
+  for(int i=0; i<wt->n; ++i) {
+    if(searchList(conflicts, wt->tab[i].name) != NULL) {
+      myGitAdd(wt->tab[i].name);
+    }
+  }
+  freeWt(wt);
+  myGitCommit(branch, message);
+  myGitCheckoutBranch(curb);
+  free(curb);
 }
 
 /**
@@ -141,17 +163,50 @@ void myGitCheckoutCommit(const char* pattern) {
   freeList(filtered);
 }
 
-/**
- * @brief Move with HEAD to where the branch points
- */
-void myGitCheckoutBranch(const char* branch) {
-  assert(branchExists(branch));
-  stf(branch, CURB);
-  char* h = getRef(branch);
-  createUpdateRef("HEAD", h);
-  // err("h : %s\n", h);
-  if(hashValid(h)) restoreCommit(h);
-  free(h);
+void commandMerge(const char* remb, const char* meg) {
+  char* curb = getCurrentBranch();
+  if(branchExists(remb) == 0)
+    err("La branche %s n'existe pas\n", remb);
+  else if(strcmp(curb, remb) == 0)
+    err("On ne peut pas faire merge sur les même branches\n");
+  else {
+    List* conflicts = merge(remb, meg);
+    if(conflicts == NULL) {
+      err("Merge bien réussi\n");
+    } else {
+      char* s = ltos(conflicts);
+      err("Il existe des conflits des fichiers (%s), veuillez opérer l'un d'eux avant de faire merge:\n", s);
+      free(s);
+      err("1. Créer un commit de suppression pour la branch %s\n", remb);
+      err("2. Créer un commit de suppression pour la branch courante %s\n", curb);
+      err("3. Choisir des fichiers que l'on garde dans la branch courante\n");
+      int d = 0;
+      scanf("%d", &d);
+      assert(1 <= d && d <= 3);
+      if(d == 1) {
+        createDeletionCommit(remb, conflicts, meg);
+      } else if(d == 2) {
+        createDeletionCommit(curb, conflicts, meg);
+      } else if(d == 3) {
+        err("Veuillez taper les noms des fichiers que vous souhaiter garder dans la branch courante:\n");
+        err("Sous forme de string1|string2|...|stringn\n");
+        char buf[MAXL];
+        scanf("%s", buf);
+        List* remains = stol(buf);
+        List* remainsb = initList();
+        for(Cell* c=*conflicts; c; c=c->next) {
+          if(searchList(remains, c->data) == NULL)
+            insertFirstString(remainsb, c->data);
+        }
+        createDeletionCommit(remb, remainsb, meg);
+        createDeletionCommit(curb, conflicts, meg);
+        freeList(remains);
+        freeList(remainsb);
+      }
+    }
+    freeList(conflicts);
+  }
+  free(curb);
 }
 
 void help() {
@@ -168,6 +223,7 @@ void help() {
     printf("myGit branch-print <branch-name>\n");
     printf("myGit checkout-branch <branch-name>\n");
     printf("myGit checkout-commit <pattern>\n");
+    printf("myGit merge <branch> <message>\n");
 }
 
 int main(int argc, char* argv[]){
@@ -178,55 +234,54 @@ int main(int argc, char* argv[]){
   if(strcmp(argv[1], "init")==0) {
     initRefs();
     initBranch();
+    return 0;
   }
   if(!file_exists(REF)) {
     err("Il faut initialiser d'abord\n");
     return 0;
   }
   if(strcmp(argv[1], "list-refs")==0) list_refs();
-  if(strcmp(argv[1], "create-ref")==0) createUpdateRef(argv[2], argv[3]);
-  if(strcmp(argv[1], "delete-ref")==0) deleteRef(argv[2]);
-  if(strcmp(argv[1], "add")==0) {
+  else if(strcmp(argv[1], "create-ref")==0) createUpdateRef(argv[2], argv[3]);
+  else if(strcmp(argv[1], "delete-ref")==0) deleteRef(argv[2]);
+  else if(strcmp(argv[1], "add")==0) {
     for(int i = 2; i < argc; i++){
       myGitAdd(argv[i]);
     }
   }
-  if(strcmp(argv[1], "clear-add")==0) {
+  else if(strcmp(argv[1], "clear-add")==0) {
     remove(ADD);
     assert(file_exists(ADD) == 0);
   }
-  if(strcmp(argv[1], "list-add") == 0) list_add();
-  if(strcmp(argv[1], "commit")==0) {
-    assert(argc == 3 || (argc == 5 && strcmp(argv[3], "-m")));
+  else if(strcmp(argv[1], "list-add") == 0) list_add();
+  else if(strcmp(argv[1], "commit")==0) {
+    assert(argc == 3 || (argc == 5 && strcmp(argv[3], "-m") == 0));
     myGitCommit(argv[2], argc == 5 ? argv[4] : NULL);
-  }
-  if(strcmp(argv[1], "get-current-branch")==0) {
+  } else if(strcmp(argv[1], "get-current-branch")==0) {
     assert(argc == 2);
     char* s = getCurrentBranch();
     printf("%s", s);
     free(s);
-  }
-  if(strcmp(argv[1], "branch")==0) {
+  } else if(strcmp(argv[1], "branch")==0) {
     assert(argc == 3);
     if(branchExists(argv[2])) {
       err("La branche existe déjà.\n");
     } else createBranch(argv[2]);
-  }
-  if(strcmp(argv[1], "branch-print")==0) {
+  } else if(strcmp(argv[1], "branch-print")==0) {
     assert(argc == 3);
     if(!branchExists(argv[2])) {
       err("La branche n'existe pas.\n");
     } else printBranch(argv[2]);
-  }
-  if(strcmp(argv[1], "checkout-branch")==0) {
+  } else if(strcmp(argv[1], "checkout-branch")==0) {
     assert(argc == 3);
     if(!branchExists(argv[2])) {
       err("La branche n'existe pas.\n");
     } else myGitCheckoutBranch(argv[2]);
-  }
-  if(strcmp(argv[1], "checkout-commit")==0) {
+  } else if(strcmp(argv[1], "checkout-commit")==0) {
     assert(argc == 3);
     myGitCheckoutCommit(argv[2]);
-  }
+  } else if(strcmp(argv[1], "merge") == 0) {
+    assert(argc == 4);
+    commandMerge(argv[2], argv[3]);
+  } else err("On ne comprend pas\n");
   return 0;
 }

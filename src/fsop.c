@@ -123,7 +123,7 @@ char* blobStringExt(const char* s, const char* ext) {
   char* fname = createTemp();
   s2f(s, fname);
   char* hash = blobFileExt(fname, ext);
-  assert(remove(fname) == 0);
+  remove(fname);
   free(fname);
   return hash;
 }

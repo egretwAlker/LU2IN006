@@ -229,19 +229,19 @@ void restoreWorkTree(WorkTree* wt, const char* path) {
 }
 
 /**
- * @brief conflicts, who should be pointing to NULL when given, will point to a List of the intersection of wt1 and wt2:w
+ * @brief conflicts, who should be pointing to NULL when given, will point to a List of the intersection of wt1 and wt2
  * @return A WorkTree with the symmetric difference of wt1 and wt2
  */
 WorkTree* mergeWorkTrees(WorkTree* wt1, WorkTree* wt2, List** conflicts) {
     WorkTree* wt = initWorkTree();
-    conflicts = initList();
+    *conflicts = initList();
     for(int i=0; i<wt1->n; ++i) {
-        if(!inWorkTree(wt2, wt1->tab[i].name)) {
+        if(inWorkTree(wt2, wt1->tab[i].name) == -1) {
             appendWorkTree(wt, wt1->tab[i].name, wt1->tab[i].hash, wt1->tab[i].mode);
         }
     }
     for(int i=0; i<wt2->n; ++i) {
-        if(!inWorkTree(wt1, wt2->tab[i].name)) {
+        if(inWorkTree(wt1, wt2->tab[i].name) == -1) {
             appendWorkTree(wt, wt2->tab[i].name, wt2->tab[i].hash, wt2->tab[i].mode);
         } else {
             insertFirstString(*conflicts, wt2->tab[i].name);

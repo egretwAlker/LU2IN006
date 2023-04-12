@@ -150,8 +150,7 @@ Commit* stc(const char* s) {
   buf1[0] = buf2[0] = 0;
   Commit* c = initCommit();
   while(*s) {
-    sscanf(s, "(%[^,],%s", buf1, buf2);
-    buf2[strlen(buf2)-1] = 0;
+    sscanf(s, "(%[^,],%[^)])", buf1, buf2);
     commitSet(c, buf1, buf2);
     s += 4+strlen(buf1)+strlen(buf2);
   }
@@ -227,7 +226,7 @@ void deleteRef(const char* ref_name) {
   char buff[MAXL];
   sprintf(buff, "%s/%s", REF, ref_name);
   assert(file_exists(buff));
-  assert(remove(buff) == 0);
+  remove(buff);
 }
 
 /**
@@ -248,7 +247,7 @@ char* getRef(const char* ref_name) {
  */
 void myGitAdd(const char* fn) {
   if(file_exists(fn) == 0) {
-    err("File does not exist\n");
+    err("File %s does not exist\n", fn);
     return;
   }
   WorkTree* wt;
@@ -258,7 +257,7 @@ void myGitAdd(const char* fn) {
   } else {
     wt = ftwt(ADD);
   }
-  if(!inWorkTree(wt, fn)) {
+  if(inWorkTree(wt, fn) == -1) {
     if(isDir(fn)) {
       appendWorkTree(wt, fn, "FOLDER", -1);
     } else {
@@ -346,7 +345,7 @@ List* getAllCommits() {
 /**
  * @brief Commit to WorkTree
  */
-WorkTree* ctwt(const Commit* c) {
+WorkTree* ctwt(Commit* c) {
   const char* hash_tree = commitGet(c, "tree");
   return htwt(hash_tree);
 }

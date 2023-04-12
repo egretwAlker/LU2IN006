@@ -36,7 +36,7 @@ char* sha256string(const char* s) {
   char* fname = createTemp();
   s2f(s, fname);
   char* res = sha256file(fname);
-  if(remove(fname)) err("File removing error\n");
+  remove(fname);
   free(fname);
   return res;
 }
