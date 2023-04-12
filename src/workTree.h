@@ -24,6 +24,7 @@ void freeWf(WorkFile* wf);
 WorkTree* initWorkTree();
 int inWorkTree(WorkTree* wt, const char* name);
 int appendWorkTree(WorkTree* wt, const char* name, const char* hash, int mode);
+char* wtts_upd(WorkTree* wt, int k);
 char* wtts(WorkTree* wt);
 int wttf(WorkTree* wt, const char* file);
 WorkTree* htwt(const char* hash);

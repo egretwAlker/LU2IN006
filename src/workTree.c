@@ -24,21 +24,26 @@ WorkFile* createWorkFile2(const char* name, const char* hash, int mode) {
 }
 
 /**
- * @brief hash should not be NULL
- * 
- * @param wf 
- * @return char* 
+ * @brief WorkFile to String; if k == 1, information about the file pointed by wf is the latest.
  */
-char* wfts(WorkFile* wf) {
+char* wfts_upd(WorkFile* wf, int k) {
     assert(wf->name != NULL);
     char buf[MAXL];
-    sprintf(buf,"%s\t%s\t%d", wf->name, wf->hash?wf->hash:"NULL", wf->mode);
+    if(k) {
+        if(isDir(wf->name)) sprintf(buf,"%s\t%s\t%o", wf->name, sha256file(wf->name), getChmod(wf->name));
+        else sprintf(buf,"%s\t%s\t%o", wf->name, "FOLDER", getChmod(wf->name));
+    }
+    else sprintf(buf,"%s\t%s\t%o", wf->name, wf->hash?wf->hash:"NULL", wf->mode);
     return strdup(buf);
+}
+
+char* wfts(WorkFile* wf) {
+    return wfts_upd(wf, 0);
 }
 
 WorkFile* stwf(const char* ch) {
     char buf1[MAXL], buf2[MAXL]; int buf3;
-    sscanf(ch, "%s\t%s\t%d", buf1, buf2, &buf3);
+    sscanf(ch, "%s\t%s\t%o", buf1, buf2, &buf3);
     return createWorkFile2(buf1, buf2, buf3);
 }
 
@@ -96,16 +101,23 @@ int appendWorkTree(WorkTree* wt, const char* name, const char* hash, int mode) {
     return 0;
 }
 
-char* wtts(WorkTree* wt) {
+/**
+ * @brief WorkTree to String; if k == 1, information about the file pointed by WorkTrees is the latest.
+ */
+char* wtts_upd(WorkTree* wt, int k) {
     char buf[MAXL]; buf[0] = 0;
     char* p = buf;
     for(int i=0; i<wt->n; ++i) {
-        char *s = wfts(&(wt->tab[i]));
+        char *s = wfts_upd(&(wt->tab[i]), k);
         sprintf(p, "%s\n", s);
         p += strlen(p);
         free(s);
     }
     return strdup(buf);
+}
+
+char* wtts(WorkTree* wt) {
+    return wtts_upd(wt, 0);
 }
 
 WorkTree* stwt(const char* s) {

@@ -13,5 +13,5 @@ echo d > d
 echo "3 a" | valgrind --leak-check=full ../../bin/myGit.exe merge junior "merge with conflict"
 ../../bin/myGit.exe branch-print master
 rm -r *
-../../bin/myGit.exe checkout-commit 8a2ca72527
+../../bin/myGit.exe checkout-commit 3e329ccccbe83
 ls

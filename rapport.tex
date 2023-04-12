@@ -1,0 +1,32 @@
+\documentclass{report}
+
+\title{LU2IN006 Rapport du projet}
+\author{Oleksandr Hoviadin, Tianxiang XIA}
+\date{\today}
+
+\begin{document}
+\maketitle
+\section{Sujet synthétique}
+On fait un système de gestion des versions des fichiers
+qui possède les fonctionnalités principales de git. sauvegarde des instantanés
+des fichiers, navigation entre différentes versions
+création et gestion des branches afin de trvailler simultanément
+sur plusieures versions des projets et reunir les branches
+en une version finale.
+
+Taper \verb|myGit| pour consulter tous les commandes possibles.
+\section{Sur l'implémentation}
+\begin{itemize}
+  \item Si on suit l'énoncé, si on fait des add, après on fait une modification des fichiers,
+  puis on fait un list-add, les informations sont vielles par rapport à la modification, or quand on
+  fait commit, c'est la version après la modification qui sera soumise. Pour cette raison, on écrit les
+  fonctions \verb|wfts_upd| et \verb|wtts_upd| qui permettent d'avoir des informations actualisées sur
+  les fichiers.
+  \item On stocke tous les nombres concernants chmod en octet, e.g. \verb|"%o"|.
+  \item On stocke tous les fichiers auxilliaires du programme dans le dossier .myGit
+  du répertoire utilisateur, une fois pour toute, on l'ignore dans \verb|listdir|.
+\end{itemize}
+
+\section{Structure de développement}
+
+\end{document}

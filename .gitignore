@@ -3,6 +3,7 @@ bin
 .vscode
 .DS_Store
 *.swp
+latex-compiled
 
 # Prerequisites
 *.d

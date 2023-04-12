@@ -81,7 +81,7 @@ void list_add() {
   else {
     printf("Zone de preparation : \n");
     WorkTree* wt = ftwt(ADD);
-    char* s = wtts(wt);
+    char* s = wtts_upd(wt, 1);
     printf("%s\n", s);
     freeWt(wt);
     free(s);

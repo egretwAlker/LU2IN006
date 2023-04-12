@@ -4,7 +4,6 @@
 #include "fsop.h"
 #include <string.h>
 
-// Est-il possible de ne pas utiliser system, ce qui est préférable par l'énoncé?
 /**
  * @brief Use sha256sum to hash source and save to dest;
  * @return int; -1 if failed
