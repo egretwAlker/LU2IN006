@@ -5,7 +5,9 @@
 #include <string.h>
 #include <stdlib.h>
 #define err(...) fprintf(stderr, __VA_ARGS__)
+// Maxmium of buf[MAXL]
 #define MAXL 2333
+// WorkTree size
 #define WTS 100
 #define SPFLDR ".mygit"
 #define REF ".mygit/.ref"

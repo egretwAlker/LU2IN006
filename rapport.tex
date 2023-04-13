@@ -14,7 +14,7 @@ création et gestion des branches afin de trvailler simultanément
 sur plusieures versions des projets et reunir les branches
 en une version finale.
 
-Taper \verb|myGit| pour consulter tous les commandes possibles.
+Lancer sans paramètre pour consulter tous les commandes possibles.
 \section{Sur l'implémentation}
 \begin{itemize}
   \item Si on suit l'énoncé, si on fait des add, après on fait une modification des fichiers,
@@ -25,8 +25,31 @@ Taper \verb|myGit| pour consulter tous les commandes possibles.
   \item On stocke tous les nombres concernants chmod en octet, e.g. \verb|"%o"|.
   \item On stocke tous les fichiers auxilliaires du programme dans le dossier .myGit
   du répertoire utilisateur, une fois pour toute, on l'ignore dans \verb|listdir|.
+  \item L'utilisation des macros dans \verb|misc.h| rend le programme très configurable.
+  \item On fait un maximal d'abstraction que possible: on réutilise des fonctions existantes.
+  \item On fait attention aux ownerships de la mémoire: chaque fonction, si elle est donnée de la mémoire pointée
+  par un pointeur, cette mémoire doit être librérée ou donnée à une autre fonction avant qu'elle termine de sorte
+  que quand le programme termine, on puisse garantir que toute la mémoire allouée est libérée. En pratique, on utilise
+  \verb|const| pour indiquer le donné de ownership, dans des cas spécifiques, on utilise des commentaires ou il est
+  clair par l'usage de la fonction.
 \end{itemize}
 
 \section{Structure de développement}
+
+\begin{verbatim}
+bin/ # les fichiers compilés
+src/ # de la sources code
+tests/ # les tests
+Makefile
+rapport.tex
+\end{verbatim}
+
+\section{Mode de test et démonstration d'utilisation}
+
+\paragraph{Test des unités} \verb|tests/tests.c|
+\paragraph{Test rassemblé/démonstration d'utilisation} \verb|tests/assembled_tests?.sh|, lancer
+les scripts dans \verb|tests/freespace|
+
+D'ailleur, taper 
 
 \end{document}

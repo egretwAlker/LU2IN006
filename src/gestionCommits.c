@@ -150,7 +150,8 @@ Commit* stc(const char* s) {
   buf1[0] = buf2[0] = 0;
   Commit* c = initCommit();
   while(*s) {
-    sscanf(s, "(%[^,],%[^)])", buf1, buf2);
+    sscanf(s, "(%[^,],%[^\n]", buf1, buf2);
+    buf2[strlen(buf2)-1] = 0;
     commitSet(c, buf1, buf2);
     s += 4+strlen(buf1)+strlen(buf2);
   }

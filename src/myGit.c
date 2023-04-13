@@ -144,9 +144,9 @@ void myGitCheckoutCommit(const char* pattern) {
   List* filtered = filterList(l, pattern);
   int sz = listSize(filtered);
   if(sz == 0) {
-    printf("Pattern not matched\n");
+    err("Pattern not matched\n");
   } else if(sz > 1) {
-    printf("Multiple matching found:\n");
+    err("Multiple matching found:\n");
     for(Cell* c = *filtered; c; c=c->next) {
       printf("-> %s\n", c->data);
     }
