@@ -30,8 +30,8 @@ char* wfts_upd(WorkFile* wf, int k) {
     assert(wf->name != NULL);
     char buf[MAXL];
     if(k) {
-        if(isDir(wf->name)) sprintf(buf,"%s\t%s\t%o", wf->name, sha256file(wf->name), getChmod(wf->name));
-        else sprintf(buf,"%s\t%s\t%o", wf->name, "FOLDER", getChmod(wf->name));
+        if(isDir(wf->name)) sprintf(buf,"%s\t%s\t%o", wf->name, "FOLDER", getChmod(wf->name));
+        else sprintf(buf,"%s\t%s\t%o", wf->name, sha256file(wf->name), getChmod(wf->name));
     }
     else sprintf(buf,"%s\t%s\t%o", wf->name, wf->hash?wf->hash:"NULL", wf->mode);
     return strdup(buf);

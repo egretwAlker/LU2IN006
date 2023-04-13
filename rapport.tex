@@ -25,12 +25,16 @@ en une version finale.
   \item On stocke tous les fichiers auxilliaires du programme dans le dossier .myGit
   du répertoire utilisateur, une fois pour toute, on l'ignore dans \verb|listdir|.
   \item L'utilisation des macros dans \verb|misc.h| rend le programme très configurable.
-  \item On fait un maximal d'abstraction que possible: on réutilise des fonctions existantes.
+  \item On fait un maximal d'abstraction que possible: on réutilise des fonctions existantes et
+  on fait des petits outils en plus de l'énoncé e.g. \verb|s2f| et \verb|f2s|.
+  \item On écrit des commentaires brèves pour les fonctions.
   \item On fait attention aux ownerships de la mémoire: chaque fonction, si elle est donnée de la mémoire pointée
   par un pointeur, cette mémoire doit être librérée ou donnée à une autre fonction avant qu'elle termine de sorte
   que quand le programme termine, on puisse garantir que toute la mémoire allouée est libérée. En pratique, on utilise
   \verb|const| pour indiquer le donné de ownership, dans des cas spécifiques, on utilise des commentaires ou il est
   clair par l'usage de la fonction.
+  \item On a ajouté command \verb|myGit log| pour pouvoir consulter l'information du dernier commit (ainsi on
+  peut utiliser l'entré \verb|second_predecessor|, qui est demandé d'être stocké par l'énoncé mais non utilisé).
 \end{itemize}
 
 \section{Structure de développement}
@@ -42,6 +46,8 @@ tests/ # les tests
 Makefile
 rapport.tex
 \end{verbatim}
+
+\section{Structure des fichiers générés par le programme}
 
 \section{Mode de test et démonstration d'utilisation}
 

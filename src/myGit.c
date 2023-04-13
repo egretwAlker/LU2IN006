@@ -119,7 +119,7 @@ List* merge(const char* remote_branch, const char* message) {
 /**
  * @brief Advance by a commit of deletion of files in conflit on branch with message
  */
-void createDeletionCommit(const char* branch, List* conflicts, const char* message) {
+void createDeletionCommit(const char* branch, const List* conflicts, const char* message) {
   remove(ADD);
   assert(branchExists(branch));
   char* curb = getCurrentBranch();
@@ -221,6 +221,7 @@ void help() {
     printf("myGit checkout-branch <branch-name>\n");
     printf("myGit checkout-commit <pattern>\n");
     printf("myGit merge <branch> <message>\n");
+    printf("myGit log\n");
 }
 
 int main(int argc, char* argv[]){
@@ -256,7 +257,7 @@ int main(int argc, char* argv[]){
   } else if(strcmp(argv[1], "get-current-branch")==0) {
     assert(argc == 2);
     char* s = getCurrentBranch();
-    printf("%s", s);
+    printf("%s\n", s);
     free(s);
   } else if(strcmp(argv[1], "branch")==0) {
     assert(argc == 3);
@@ -279,6 +280,14 @@ int main(int argc, char* argv[]){
   } else if(strcmp(argv[1], "merge") == 0) {
     assert(argc == 4);
     commandMerge(argv[2], argv[3]);
+  } else if(strcmp(argv[1], "log") == 0) {
+    char* h = getRef("HEAD");
+    Commit* c = htc(h);
+    char* s = cts(c);
+    printf("%s\n", s);
+    free(s);
+    freeCommit(c);
+    free(h);
   } else err("On ne comprend pas\n");
   return 0;
 }

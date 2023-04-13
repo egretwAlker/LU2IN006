@@ -232,7 +232,7 @@ void deleteRef(const char* ref_name) {
 
 /**
  * @brief
- * @return Content of ref_name, NULL if non existing; "" if empty
+ * @return Content (hash representing where it points) of ref_name, NULL if non existing; "" if empty
  */
 char* getRef(const char* ref_name) {
   char buf[MAXL];

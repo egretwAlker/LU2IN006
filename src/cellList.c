@@ -68,14 +68,14 @@ int listSize(const List* l) {
 /**
  * @brief Without strdup, return the string represented by c
  */
-char* ctos(Cell* c) {
+char* ctos(const Cell* c) {
   return c->data;
 }
 
 /**
  * @brief Return the concatenation of strings of cells of l in the form "string1|string2|...|stringn"
  */
-char* ltos(List* l) {
+char* ltos(const List* l) {
   int len = 1;
   for(Cell* c=*l; c; c=c->next) {
     len += (int)strlen(ctos(c));
@@ -108,7 +108,7 @@ Cell* listGet(List* l, int k) {
 /**
  * @brief Return the first cell of which the data equals to s or NULL if not found.
  */
-Cell* searchList(List* l, const char* s) {
+Cell* searchList(const List* l, const char* s) {
  if(l == NULL) return NULL;
  for(Cell *c = *l; c; c=c->next) if(strcmp(c->data, s)==0) return c;
  return NULL;
@@ -133,7 +133,7 @@ List* stol(const char* s) {
   return l;
 }
 
-void ltof(List* l, const char* path) {
+void ltof(const List* l, const char* path) {
   char *s = ltos(l);
   s2f(s, path);
 }
