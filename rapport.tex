@@ -26,10 +26,13 @@ Makefile
 \section*{Structure de code}
 \begin{itemize}
     \item \textbf{hashFunc.c} : contient les fonctions pour créer et manipuler les hashes.
-    \item \textbf{cellList.c} : contient les fonctions pour manipuler des listes des chaînes des caractères : \verb|Cell|, \verb|List|, etc.
+    \item \textbf{cellList.c} : contient les fonctions pour manipuler des listes des chaînes des caractères : \verb|Cell|, \verb|List| (liste simplement chaînée), etc.
     \item \textbf{fsop.c} : contient les fonctions pour manipuler des fichiers et dossiers : \verb|listdir|, \verb|blobFile|, etc.
-    \item \textbf{workTree.c} : contient les fonctions pour manipuler ensembles de fichiers : \verb|WorkFile|, \verb|WorkTree|, \verb|saveWorkTree|, \verb|restoreWorkTree|, etc.
-    \item \textbf{gestionCommits.c} : contient les fonctions permettant naviguer entre instantanés, construire et maintenir arborescence des différentes versions de projet : \verb|Commit|, etc.
+    \item \textbf{workTree.c} : contient les fonctions pour manipuler ensembles de fichiers : \verb|WorkFile|,
+    \verb|WorkTree| (arbre des dossiers et des fichiers comme feuilles),
+    \verb|saveWorkTree|, \verb|restoreWorkTree|, etc.
+    \item \textbf{gestionCommits.c} : contient les fonctions permettant naviguer entre instantanés, construire et maintenir arborescence des différentes versions de projet :
+    \verb|Commit| (table de hachage), etc.
     \item\textbf{myGit.c} : les codes sur l'interface utilisateur et les interactions : \verb|main|, etc.
     \item\textbf{misc.c} : les fonctions/macros supplémentaires qui sont pourtant très utiles.
 \end{itemize}
