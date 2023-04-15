@@ -6,55 +6,60 @@
 
 \begin{document}
 \maketitle
-\section{Sujet synthétique}
-On fait un système de gestion des versions des fichiers
-qui possède les fonctionnalités principales de git. sauvegarde des instantanés
-des fichiers, navigation entre différentes versions
-création et gestion des branches afin de trvailler simultanément
-sur plusieures versions des projets et reunir les branches
-en une version finale.
+\section*{Sujet synthétique}
+On crée un outil de gestion des versions des fichiers
+qui possède les fonctionnalités principales de git : sauvegarde des instantanés
+des fichiers, navigation entre différentes versions,
+création et gestion des branches afin de travailler simultanément
+sur plusieures versions des projets et avoir la possibilité de réunir les branches en une version finale.
 
-\section{Sur l'implémentation}
+\section*{Structure de développement}
+
+\begin{verbatim}
+bin/ # fichiers compilés/exécutables
+src/ # fichiers source
+tests/ # jeu de tests
+Makefile
+\end{verbatim}
+
+\section*{Structure de code}
 \begin{itemize}
-  \item Si on suit l'énoncé, si on fait des add, après on fait une modification des fichiers,
-  puis on fait un list-add, les informations sont vielles par rapport à la modification, or quand on
-  fait commit, c'est la version après la modification qui sera soumise. Pour cette raison, on écrit les
-  fonctions \verb|wfts_upd| et \verb|wtts_upd| qui permettent d'avoir des informations actualisées sur
-  les fichiers.
-  \item On stocke tous les nombres concernants chmod en octet, e.g. \verb|"%o"|.
-  \item On stocke tous les fichiers auxilliaires du programme dans le dossier .myGit
-  du répertoire utilisateur, une fois pour toute, on l'ignore dans \verb|listdir|.
+    \item \textbf{hashFunc.c} : contient les fonctions pour créer et manipuler les hashes.
+    \item \textbf{cellList.c} : contient les fonctions pour manipuler des listes des chaînes des caractères : \verb|Cell|, \verb|List|, etc.
+    \item \textbf{fsop.c} : contient les fonctions pour manipuler des fichiers et dossiers : \verb|listdir|, \verb|blobFile|, etc.
+    \item \textbf{workTree.c} : contient les fonctions pour manipuler ensembles de fichiers : \verb|WorkFile|, \verb|WorkTree|, \verb|saveWorkTree|, \verb|restoreWorkTree|, etc.
+    \item \textbf{gestionCommits.c} : contient les fonctions permettant naviguer entre instantanés, construire et maintenir arborescence des différentes versions de projet : \verb|Commit|, etc.
+    \item\textbf{myGit.c} : les codes sur l'interface utilisateur et interaction où se trouve la fonction \verb|main|.
+    \item\textbf{misc.c} : les fonctions/macros supplémentaires qui sont pourtant très utiles.
+\end{itemize}
+
+\section*{Sur l'implémentation}
+\begin{itemize}
+  \item Selon l'énoncé, après avoir ajouté les fichiers dans la zone de préparation on peut encore les modifier et quand on
+  fait commit c'est la version la plus récente qui sera soumise. Pour cette raison, on a défini les
+  fonctions \verb|wfts_upd| et \verb|wtts_upd| qui permettent de retouren l'état actuel des fichiers en chaîne de caractères.
+  \item On stocke tous les nombres concernants mode en octal, e.g. \verb|"%o"|.
+  \item On stocke tous les fichiers auxilliaires du programme dans le dossier .mygit
+  du répertoire utilisateur. Une fois pour tout, on l'ignore dans \verb|listdir|.
   \item L'utilisation des macros dans \verb|misc.h| rend le programme très configurable.
-  \item On fait un maximal d'abstraction que possible: on réutilise des fonctions existantes et
-  on fait des petits outils en plus de l'énoncé e.g. \verb|s2f| et \verb|f2s|.
+  \item On fait un maximum d'abstraction que possible: on réutilise des fonctions existantes et
+  on fait des petits outils en dehors de l'énoncé qui peuvent aider à coder les fonctions proposées dans énoncé e.g. \verb|s2f| et \verb|f2s|.
   \item On écrit des commentaires brèves pour les fonctions.
   \item On fait attention aux ownerships de la mémoire: chaque fonction, si elle est donnée de la mémoire pointée
   par un pointeur, cette mémoire doit être librérée ou donnée à une autre fonction avant qu'elle termine de sorte
   que quand le programme termine, on puisse garantir que toute la mémoire allouée est libérée. En pratique, on utilise
-  \verb|const| pour indiquer le donné de ownership, dans des cas spécifiques, on utilise des commentaires ou il est
+  \verb|const| pour indiquer l'information sur ownership, dans des cas spécifiques, on utilise des commentaires ou il est
   clair par l'usage de la fonction.
   \item On a ajouté command \verb|myGit log| pour pouvoir consulter l'information du dernier commit (ainsi on
-  peut utiliser l'entré \verb|second_predecessor|, qui est demandé d'être stocké par l'énoncé mais non utilisé).
+  peut utiliser l'entré \verb|second_predecessor|, qui est demandé d'être stocké par l'énoncé mais n'est pas utilisé).
 \end{itemize}
 
-\section{Structure de développement}
-
-\begin{verbatim}
-bin/ # les fichiers compilés
-src/ # de la sources code
-tests/ # les tests
-Makefile
-rapport.tex
-\end{verbatim}
-
-\section{Structure des fichiers générés par le programme}
-
-\section{Mode de test et démonstration d'utilisation}
+\section*{Mode de test et démonstration d'utilisation}
 
 \paragraph{Test des unités} \verb|tests/tests.c|
-\paragraph{Test rassemblé/démonstration d'utilisation} \verb|tests/assembled_tests?.sh|, lancer
-les scripts dans \verb|tests/freespace|
+\paragraph{Test rassemblé/démonstration d'utilisation}\verb|tests/assembled_tests?.sh|, 
+on lance les scripts dans \verb|tests/freespace|
 
-Lancer sans paramètre pour consulter tous les commandes possibles.
+\paragraph{}Pour consulter toutes les commandes possibles, veuillez lancer \verb|myGit| sans paramètre.
 
 \end{document}
