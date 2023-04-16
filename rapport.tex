@@ -26,14 +26,14 @@ Makefile
 \section*{Structure de code}
 \begin{itemize}
     \item \textbf{hashFunc.c} : contient les fonctions pour créer et manipuler les hashes.
-    \item \textbf{cellList.c} : contient les fonctions pour manipuler des listes des chaînes des caractères : \verb|Cell|, \verb|List| (liste simplement chaînée), etc.
+    \item \textbf{cellList.c} : contient les fonctions et structures pour manipuler des listes des chaînes des caractères : \verb|Cell|, \verb|List| (liste simplement chaînée), etc.
     \item \textbf{fsop.c} : contient les fonctions pour manipuler des fichiers et dossiers : \verb|listdir|, \verb|blobFile|, etc.
-    \item \textbf{workTree.c} : contient les fonctions pour manipuler ensembles de fichiers : \verb|WorkFile|,
+    \item \textbf{workTree.c} : contient les fonctions et structures pour manipuler ensembles de fichiers : \verb|WorkFile|,
     \verb|WorkTree| (arbre des dossiers et des fichiers comme feuilles),
     \verb|saveWorkTree|, \verb|restoreWorkTree|, etc.
-    \item \textbf{gestionCommits.c} : contient les fonctions permettant naviguer entre instantanés, construire et maintenir arborescence des différentes versions de projet :
+    \item \textbf{gestionCommits.c} : contient les fonctions et structures permettant naviguer entre instantanés, construire et maintenir arborescence des différentes versions de projet :
     \verb|Commit| (table de hachage), etc.
-    \item\textbf{myGit.c} : les codes sur l'interface utilisateur et les interactions : \verb|main|, etc.
+    \item\textbf{myGit.c} : le code sur l'interface utilisateur et les interactions : \verb|main|, etc.
     \item\textbf{misc.c} : les fonctions/macros supplémentaires qui sont pourtant très utiles.
 \end{itemize}
 
@@ -41,7 +41,7 @@ Makefile
 \begin{itemize}
   \item Selon l'énoncé, après avoir ajouté les fichiers dans la zone de préparation on peut encore les modifier et quand on
   fait commit c'est la version la plus récente qui sera soumise. Pour cette raison, on a défini les
-  fonctions \verb|wfts_upd| et \verb|wtts_upd| qui permettent de retouren l'état actuel des fichiers en chaîne de caractères.
+  fonctions \verb|wfts_upd| et \verb|wtts_upd| qui permettent de retourner l'état actuel des fichiers en chaîne de caractères.
   \item On stocke tous les nombres concernants mode en octal, e.g. \verb|"%o"|.
   \item On stocke tous les fichiers auxilliaires du programme dans le dossier .mygit
   du répertoire utilisateur. Une fois pour tout, on l'ignore dans \verb|listdir|.
