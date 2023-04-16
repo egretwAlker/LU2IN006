@@ -9,7 +9,7 @@ char* hashToPath(const char* hash);
 char* hashToPathExt(const char* hash, const char* ext);
 void blobFile(const char* file);
 char* blobFileExt(const char* file, const char* ext);
-char* blobStringExt(const char* file, const char* ext);
+char* blobStringExt(const char* s, const char* ext);
 char* createTemp();
 int getChmod(const char* path);
 void setMode(int mode, const char * path);

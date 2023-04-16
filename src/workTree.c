@@ -99,7 +99,6 @@ int appendWorkTree(WorkTree* wt, const char* name, const char* hash, int mode) {
         return -1;
     }
     if(inWorkTree(wt, name) != -1) return 0;
-    // protestation of not having double pointers
     WorkFile *w = createWorkFile2(name, hash, mode);
     wt->tab[(wt->n)++] = *w; free(w);
     return 0;
@@ -184,7 +183,8 @@ WorkTree* getWtFromPath(const char* path) {
 }
 
 /**
- * @brief This is an adhoc fonction to saveWorkTree, hash pointer points to the new hash, take the ownership of hash
+ * @brief This is an adhoc fonction to saveWorkTree, hash pointer points to the new hash
+ * take the ownership of hash
  */
 void updateWf(WorkFile* wf, char* hash, int mode) {
     free(wf->hash);

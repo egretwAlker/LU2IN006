@@ -43,9 +43,6 @@ void freeCommit(Commit* c) {
 
 /**
  * @brief Convert an element to a string in form "key: value"
- * 
- * @param k 
- * @return char* 
  */
 char* kvts(const kvp* k) {
   char buf[MAXL];
@@ -231,7 +228,6 @@ void deleteRef(const char* ref_name) {
 }
 
 /**
- * @brief
  * @return Content (hash representing where it points) of ref_name, NULL if non existing; "" if empty
  */
 char* getRef(const char* ref_name) {
@@ -330,7 +326,6 @@ List* branchList(const char* branch) {
 }
 
 /**
- * @brief
  * @return The Hashes of all the commits (of all branches)
  */
 List* getAllCommits() {

@@ -6,19 +6,12 @@ struct cell {
   Cell* next;
 };
 typedef Cell* List;
-
-/*
-Data format:
-  Char array (string) should end with '\0'
-  A list must not be NULL; the order of the cells in a list is not important (à vérifier)
-*/
-
 List* initList();
 Cell* buildCell(const char* s);
 void insertFirst(List* l, Cell* c);
 void insertFirstString(List* l, const char* s);
 List* filterList(const List* l, const char* pattern);
-char* ctos(const Cell* c);
+const char* ctos(const Cell* c);
 char* ltos(const List* l);
 Cell* listGet(List* l, int k);
 Cell* searchList(const List* l, const char* s);

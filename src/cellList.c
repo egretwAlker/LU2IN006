@@ -68,7 +68,7 @@ int listSize(const List* l) {
 /**
  * @brief Without strdup, return the string represented by c
  */
-char* ctos(const Cell* c) {
+const char* ctos(const Cell* c) {
   return c->data;
 }
 
@@ -101,7 +101,7 @@ Cell* listGet(List* l, int k) {
     c = c->next;
     --k;
   }
-  if(c == NULL) err("index out of range");
+  assert(c != NULL); // index out of range
   return c;
 }
 

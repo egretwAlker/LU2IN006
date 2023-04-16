@@ -1,9 +1,8 @@
 #ifndef WORKTREE
 #define WORKTREE
-
+#include "cellList.h"
 /**
  * @brief Represent a file or a folder/directory.
- * 
  */
 typedef struct {
     char* name;

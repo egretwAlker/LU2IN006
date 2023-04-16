@@ -8,8 +8,6 @@
 
 /**
  * @brief Store all names of files and directories in a list which is then returned
- *
- * @param root_dir 
  * @return List* 
  */
 List* listdir(const char* root_dir) {
@@ -29,8 +27,6 @@ List* listdir(const char* root_dir) {
 
 /**
  * @brief This function doesn't go deeper
- * 
- * @param file 
  * @return int 1 if file (can be a folder) exists at the depth 1
  */
 int file_exists(const char* file) {
