@@ -46,6 +46,13 @@ Makefile
   \item On stocke tous les nombres concernants mode en octal, e.g. \verb|"%o"|.
   \item On stocke tous les fichiers auxilliaires du programme dans le dossier .mygit
   du répertoire utilisateur. Une fois pour tout, on l'ignore dans \verb|listdir|.
+  \begin{verbatim}
+  .mygit/.add (WorkTree représentant la zone de mémoire)
+        /.current_branch (nom de la branche courante)
+        /.ref/HEAD (hash du commit où il pointe)
+             /master
+             ...
+  \end{verbatim}
   \item L'utilisation des macros dans \verb|misc.h| rend le programme très configurable.
   \item On fait un maximum d'abstraction que possible: on réutilise des fonctions existantes et
   on fait des petits outils en dehors de l'énoncé qui peuvent beaucoup aider e.g. \verb|s2f|, \verb|f2s|, \verb|blobStringExt| (consulter les commentaires pour savoir l'usage des fonctions).
